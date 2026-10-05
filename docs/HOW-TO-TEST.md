@@ -18,10 +18,16 @@ You need:
 
 ## 1. Chrome / Edge / Brave (recommended)
 
-1. Unzip `better-deepseek-chrome.zip` somewhere you will remember
-   (e.g. `Documents\better-deepseek\`). You should end up with a folder that
-   directly contains `manifest.json`, `content.js`, `content.css`, …
+1. Get `better-deepseek-chrome.zip` — it is committed at the **root of the
+   repository**, so you can download it straight from GitHub
+   (`Code` → the file in the file list → *Download raw file*), or use the copy
+   sitting next to this guide in the project folder.
+   Unzip it somewhere you will remember (e.g. `Documents\better-deepseek\`).
+   You should end up with a folder that directly contains `manifest.json`,
+   `content.js`, `content.css`, …
    *If you already have the source folder, you can use `dist-chrome/` as-is.*
+   *The zip is rebuilt and committed on every change, so re-download it
+   (or rebuild with `npm run build:chrome`) to pick up fixes.*
 2. Open a new tab and go to: **`chrome://extensions`**
    (Edge: `edge://extensions`, Brave: `brave://extensions`).
 3. Turn on **Developer mode** — the switch in the **top-right corner**.
@@ -97,6 +103,9 @@ npm run build        # builds Chrome + Firefox into dist-chrome/ and dist-firefo
 
 * Chrome: `chrome://extensions` → on the Better DeepSeek card press the
   **circular reload icon**, then refresh the DeepSeek tab.
+* Using the committed zip instead? Download the new
+  `better-deepseek-chrome.zip`, unzip over/replace the old folder, then press the
+  same reload icon.
 * Firefox: remove the old temporary add-on and load it again (§2).
 * The ready-to-share archives `better-deepseek-chrome.zip` and
   `better-deepseek-firefox.zip` are rewritten by every build.
@@ -139,7 +148,8 @@ Typical fixes:
 |---|---|
 | Chrome build (load this folder) | `dist-chrome/` |
 | Firefox build | `dist-firefox/` |
-| Shareable archives | `better-deepseek-chrome.zip`, `better-deepseek-firefox.zip` |
+| Quick-test archive (committed in Git) | `better-deepseek-chrome.zip` at the repository root |
+| Other archives | `better-deepseek-firefox.zip` (local build output, not committed) |
 | Android staging folder | `android/app/src/main/assets/bds/` |
 | Local style preview (no browser extension needed) | `node scripts/serve-preview.js 8081` → open the preview |
 | Full plan and design notes | `docs/PLAN-native-ui-and-settings.md`, `docs/deepseek-design-reference.md` |

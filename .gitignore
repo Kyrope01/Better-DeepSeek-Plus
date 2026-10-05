@@ -40,7 +40,9 @@ scratch/
 android/local.properties
 better-deepseek-firefox.zip
 better-deepseek-source.zip
-better-deepseek-chrome.zip
+# better-deepseek-chrome.zip is intentionally NOT ignored: it is the quick-test
+# build committed at the repository root so it can be downloaded straight from
+# GitHub. Rebuild it with `npm run build:chrome` before every commit.
 coverage/
 playwright-report/
 playwright-report-android/
