@@ -131,7 +131,7 @@ Typical fixes:
 
 | Symptom | Fix |
 |---|---|
-| No “Better DeepSeek” section in DeepSeek's Settings | DeepSeek may have changed its dialog markup. Open the console (`F12`), open Settings, and paste `copy(JSON.stringify(__BDS_DIAG__.dump(), null, 1))` — send that output and detection can be pinned to the exact markup. The extension also logs `[BDS:native-settings] a dialog is open but was not recognised…` in that situation. |
+| No “Better DeepSeek” section in DeepSeek's Settings | Open the console (`F12`), open Settings, and run `__BDS_DIAG__.force()` — it clears the caches and retries immediately, then prints what it sees. If the section still does not appear, send the output of `copy(JSON.stringify(__BDS_DIAG__.dump(), null, 1))` (it lists every dialog, its resolved card, size, controls, rail and mount state) and detection can be pinned to your exact markup. |
 | The page feels slow or frozen when a dialog opens | Please report it at once with the console open. The scanner is debounced, rate-limited and bounded by design, so the page should never block. |
 | No BDS pill in the corner | Correct — there is none by default. The settings are in DeepSeek's own menu. |
 | Want the old sidebar drawer | Turn on *Show the floating BDS button* inside the panel, or run `__BDS_UI__.openDrawer()` in the console. |

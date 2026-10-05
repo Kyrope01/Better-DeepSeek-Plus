@@ -4,10 +4,15 @@ import { __nativeSettingsInternals } from "./native-settings.js";
 
 const {
   classify,
+  resolveDialog,
+  findCardInside,
   findNavRail,
   countControls,
+  contentColumn,
   mountTargets,
   looksModalish,
+  isDialogRootish,
+  placementOk,
   observerConfig,
   guards,
 } = __nativeSettingsInternals;
@@ -168,6 +173,120 @@ describe("native settings dialog detection", () => {
     expect(guards.SWEEP_HEARTBEAT_MS).toBeGreaterThanOrEqual(3000);
     expect(guards.MAX_NODES).toBeLessThanOrEqual(1000);
     expect(guards.MAX_ATTEMPTS_PER_DIALOG).toBeLessThanOrEqual(6);
+  });
+
+  it("unwraps a full-viewport overlay to the settings card inside it", () => {
+    // The live dialog arrives as an overlay wrapper with hashed class names and no
+    // ARIA role; the card inside it holds the rail. The overlay itself must never
+    // be treated as the mount target.
+    document.body.innerHTML = `
+      <div class="hashed-overlay-9f2c">
+        <div class="hashed-card-4a1b">
+          <div class="hashed-rail-77aa">
+            <div class="hashed-item">General</div>
+            <div class="hashed-item">Profile</div>
+            <div class="hashed-item">Data</div>
+            <div class="hashed-item">About</div>
+          </div>
+          <div class="hashed-content-88bb">
+            <div class="hashed-row">Theme</div>
+            <div class="hashed-row">Language</div>
+          </div>
+        </div>
+      </div>`;
+    const overlay = document.querySelector(".hashed-overlay-9f2c");
+    const card = document.querySelector(".hashed-card-4a1b");
+    const items = [...overlay.querySelectorAll(".hashed-item")];
+    const content = document.querySelector(".hashed-content-88bb");
+
+    // Overlay covers the whole 1024x768 jsdom viewport; the card is centred.
+    makeVisible(overlay, 1024, 768, 0, 0);
+    makeVisible(card, 780, 560, 120, 100);
+    makeVisible(content, 520, 460, 330, 140);
+    makeVisible(document.querySelector(".hashed-rail-77aa"), 180, 480, 140, 130);
+    items.forEach((el, i) => makeVisible(el, 150, 40, 150, 150 + i * 48));
+    for (const row of content.children) makeVisible(row, 500, 40, 340, 160);
+
+    expect(resolveDialog(overlay)).toBe(card);
+    expect(classify(resolveDialog(overlay), true)).toBeGreaterThan(0);
+    expect(findCardInside(overlay)).toBe(card);
+
+    // The mount target must be the content column (right of the rail), not the card.
+    expect(contentColumn(card, findNavRail(card))).toBe(content);
+    const targets = mountTargets(card);
+    expect(targets[0]).toBe(content);
+  });
+
+  it("rejects a placement that reports a size but sits outside the card", () => {
+    document.body.innerHTML = `
+      <div class="hashed-card-4a1b" id="card"></div>
+      <div id="host"></div>`;
+    const card = document.getElementById("card");
+    const host = document.getElementById("host");
+    makeVisible(card, 780, 520, 100, 100);           // card spans y 100..620
+    makeVisible(host, 760, 300, 110, 700);           // host starts below the card
+    expect(placementOk(host, card)).toBe(false);
+
+    makeVisible(host, 760, 300, 110, 400);           // overlapping, inside
+    expect(placementOk(host, card)).toBe(true);
+
+    makeVisible(host, 60, 300, 110, 400);            // squeezed column
+    expect(placementOk(host, card)).toBe(false);
+  });
+
+  it("accepts a settings dialog during a probe window even without known controls", () => {
+    // A click on the site's own Settings entry proves intent, so a rail alone is
+    // enough — the live dialog exposes no class names we could match on.
+    document.body.innerHTML = `
+      <div class="x-card">
+        <div class="x-rail">
+          <div class="x-item">General</div>
+          <div class="x-item">Profile</div>
+          <div class="x-item">Data</div>
+        </div>
+        <div class="x-content"><div>Theme</div></div>
+      </div>`;
+    const card = document.querySelector(".x-card");
+    const items = [...card.querySelectorAll(".x-item")];
+    makeVisible(card, 780, 520, 120, 120);
+    makeVisible(document.querySelector(".x-rail"), 180, 400, 140, 140);
+    makeVisible(document.querySelector(".x-content"), 520, 400, 330, 140);
+    items.forEach((el, i) => makeVisible(el, 150, 40, 150, 150 + i * 48));
+
+    expect(classify(card, false)).toBeGreaterThan(0);  // rail is enough anyway
+    expect(classify(card, true)).toBeGreaterThan(0);
+  });
+
+  it("ignores attribute churn outside dialog containers", () => {
+    const row = document.createElement("div");
+    row.className = "chat-row";
+    expect(isDialogRootish(row)).toBe(false);
+
+    const modal = document.createElement("div");
+    modal.className = "ds-modal";
+    expect(isDialogRootish(modal)).toBe(true);
+  });
+
+  it("never reads text from containers while probing clicks (freeze hazard)", () => {
+    // textContent on a big container serialises the whole subtree; the probe must
+    // bail out on anything that is not a small row.
+    const big = document.createElement("div");
+    big.className = "app-root";
+    for (let i = 0; i < 40; i++) big.appendChild(document.createElement("div"));
+    document.body.appendChild(big);
+
+    let read = false;
+    Object.defineProperty(big, "textContent", {
+      get() {
+        read = true;
+        return "";
+      },
+    });
+
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    // Simulate a click landing on the container itself.
+    big.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(read).toBe(false);
   });
 
   it("offers several mount targets, ending with the dialog itself", () => {

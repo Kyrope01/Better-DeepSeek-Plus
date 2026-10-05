@@ -2,35 +2,39 @@
  * DeepSeek-native settings bridge.
  *
  * Better DeepSeek's settings are rendered *inside chat.deepseek.com's own Settings
- * dialog*, so the extension has no settings UI of its own to find.
+ * dialog*, so the extension adds no button, badge or menu row of its own.
  *
- * ── Why this module is careful about performance ──────────────────────────────
- * The dialog is React-rendered with hashed class names that change between
- * releases, so it is recognised by **shape**, never by a class hash or by
- * locale-dependent text. That means DOM inspection — and DOM inspection on a live
- * chat page is expensive: every `getBoundingClientRect()`/`getComputedStyle()`
- * forces layout, and React mutates attributes and nodes continuously (token
- * streaming, animations, virtual lists). An earlier revision observed *every*
- * attribute change and re-scanned the document on each one; on a real account
- * that pinned the main thread and froze the page.
+ * ── Finding the dialog without knowing its markup ─────────────────────────────
+ * The site is React with hashed CSS-module class names that change between
+ * releases, and the Settings dialog carries no stable class or ARIA role. So the
+ * dialog is found by **shape and by intent**, never by a class hash or by text:
  *
- * The rules that keep this cheap, and must stay in place:
- *   • observe `childList` only — never `attributes`;
- *   • only look at added/removed elements that plausibly contain a dialog;
- *   • debounce scans (150 ms) and rate-limit them (≥500 ms apart);
- *   • cheap selectors first, the expensive `[class*="modal" i]` sweep only as a
- *     fallback and at most once a second;
- *   • bound every DOM walk (MAX_NODES) instead of iterating a whole dialog;
- *   • cache per-dialog classification/nav-rail (WeakMap) and mount attempts;
- *   • never mount more than a couple of times per dialog, with backoff;
- *   • do nothing at all while the tab is hidden.
+ *   1. **Trigger capture** — a click on the site's own “Settings” entry marks the
+ *      next few seconds as a probe window. Any large element that appears in that
+ *      window is treated as the dialog, whatever its class names look like.
+ *   2. **Shape** — candidates are resolved to their “card”: if the element covers
+ *      the viewport (an overlay/backdrop), the card inside it is the smallest
+ *      descendant that has a navigation rail (three or more similar rows stacked
+ *      in its left half, found geometrically) or two form controls.
+ *   3. **Mounting with proof** — the panel is appended to the dialog's content
+ *      column (the area right of the rail), and the placement is measured: the
+ *      panel must really lay out inside the card, otherwise the next container is
+ *      tried. The host is then fitted to the free height and given its own scroll,
+ *      so a short dialog can never clip the panel out of sight.
  *
- * Injection is additive and reversible: one marked host element holds the Svelte
- * panel, a heartbeat re-appends it if React drops it, and it is unmounted when the
- * dialog closes. The drawer (and its markup contract) is untouched.
+ * ── Performance contract (a real-account freeze taught this the hard way) ─────
+ * The observed DOM is a live chat page: React mutates attributes thousands of
+ * times a second and streaming tokens add nodes continuously. Therefore:
+ *   • observe `childList` plus a *filtered* attribute set (class/style/hidden),
+ *     and only treat an attribute change as interesting when it is on a dialog
+ *     container itself — pure string work, no layout reads;
+ *   • debounce scans (150 ms), rate-limit them (500 ms), skip while tab hidden;
+ *   • bound every DOM walk (MAX_NODES) and every list;
+ *   • cache per-dialog classification and rail lookups; cap mount attempts;
+ *   • one full-document sweep at most every 5 s.
  *
- * Debugging: `__BDS_DIAG__.dump()` returns every candidate's size, controls, rail,
- * classes and text, plus mount-attempt state.
+ * Debugging: `__BDS_DIAG__.dump()` reports every candidate, its resolved card and
+ * the mount state; `__BDS_DIAG__.force()` clears the caches and retries at once.
  */
 
 import { mount, unmount } from "svelte";
@@ -44,14 +48,20 @@ const DIALOG_ATTR = "data-bds-settings-dialog";
 const SCAN_DEBOUNCE_MS = 150;
 const SCAN_MIN_INTERVAL_MS = 500;
 const HEARTBEAT_MS = 1500;
-/** Fallback full-document sweep interval when no dialog markup is present yet. */
+/** Fallback full-document sweep interval when nothing dialog-shaped is around. */
 const SWEEP_HEARTBEAT_MS = 5000;
 /** Ceiling for every DOM walk — cost stays constant on huge dialogs. */
 const MAX_NODES = 600;
 /** Mount attempts allowed per dialog before it is left alone (with backoff). */
 const MAX_ATTEMPTS_PER_DIALOG = 4;
 
-/** Cheap "could this be a dialog?" hint used to filter mutations and the heartbeat. */
+/** Elements added to the DOM recently; used for trigger-based discovery. */
+const RECENT_TTL_MS = 5000;
+const RECENT_MAX = 40;
+
+const SETTINGS_LABELS = ["Settings", "设置", "Настройки", "Ayarlar", "تنظیمات"];
+
+/** Cheap "could this be a dialog?" hint used to filter mutations and heartbeats. */
 const MODAL_HINT = '.ds-modal-content, .ds-modal, [role="dialog"], [class*="modal" i]';
 
 /** Form controls the site uses in settings screens (real elements first). */
@@ -61,6 +71,7 @@ const CONTROL_SELECTOR = [
   ".ds-checkbox",
   'input[type="checkbox"]',
   '[role="checkbox"]',
+  '[role="radio"]',
   ".ds-radio-button-group",
   '[role="radiogroup"]',
   'input[type="radio"]',
@@ -76,8 +87,8 @@ const CONTROL_SELECTOR = [
 
 const CONTROL_CLASS_RE = /(switch|checkbox|radio|segmented|select|slider|slid)/i;
 
-/** The two most reliable dialog selectors; the class sweep is the fallback. */
-const DIALOG_SELECTOR_FAST = ".ds-modal-content, .ds-modal, [role=\"dialog\"]";
+/** The two most reliable dialog selectors; class sweeps are the fallback. */
+const DIALOG_SELECTOR_FAST = '.ds-modal-content, .ds-modal, [role="dialog"]';
 
 let observer = null;
 let heartbeat = null;
@@ -95,19 +106,32 @@ let lastSweepAt = 0;
 let lastSweepHeartbeatAt = 0;
 let scanning = false;
 
-const warnedCandidates = new WeakSet();
-/** Per-dialog: { attempts, lastAttemptAt, klass, rail, klassAt } */
-const dialogState = new WeakMap();
+/** Timestamp of the last click on the site's own Settings entry. */
+let settingsClickedAt = 0;
+
+const warnedCandidates = new Set();
+/** Per-dialog: { attempts, lastAttemptAt, klass, klassAt, rail, railAt } */
+const dialogState = new Map();
+/** Elements added to the DOM recently (see rememberAdded). */
+const recentAdded = [];
 
 /* ── small helpers ───────────────────────────────────────────────────────── */
 
 function stateOf(el) {
   let s = dialogState.get(el);
   if (!s) {
-    s = { attempts: 0, lastAttemptAt: 0, klass: null, klassAt: 0, rail: null, railAt: 0 };
+    s = { attempts: 0, mounted: false, lastAttemptAt: 0, klass: null, klassAt: 0, rail: null, railAt: 0 };
     dialogState.set(el, s);
   }
   return s;
+}
+
+/** Drop bookkeeping for elements that left the DOM (keeps the Map bounded). */
+function pruneState() {
+  if (dialogState.size <= 60 && recentAdded.length <= RECENT_MAX * 2) return;
+  for (const el of dialogState.keys()) if (!el.isConnected) dialogState.delete(el);
+  const now = Date.now();
+  while (recentAdded.length && now - recentAdded[0].at > RECENT_TTL_MS) recentAdded.shift();
 }
 
 /** Visible = attached, non-zero box, not display:none/visibility:hidden. */
@@ -120,31 +144,102 @@ function isVisible(el) {
 }
 
 function isOurNode(el) {
-  return !!el.closest("#bds-root") || !!el.closest(`[${HOST_ATTR}]`);
+  return !!el.closest?.("#bds-root") || !!el.closest?.(`[${HOST_ATTR}]`);
+}
+
+/**
+ * Text of a *small* element only. Reading `textContent` serialises the whole
+ * subtree, so it must never be done on a container (the click target can be the
+ * app root) — that alone is enough to stall the main thread on a big page.
+ */
+function smallText(el) {
+  if (!el || el.nodeType !== 1 || el.childElementCount > 6) return "";
+  const text = (el.textContent || "").trim();
+  return text.length > 40 ? "" : text;
 }
 
 function classNameOf(el) {
   return typeof el.className === "string" ? el.className : el.getAttribute?.("class") || "";
 }
 
-/** Cheap structural pre-filter: is this element (or its subtree) dialog-shaped? */
-function looksModalish(node) {
-  if (!node || node.nodeType !== 1) return false;
-  if (node.matches?.(MODAL_HINT)) return true;
-  // A fresh dialog arrives as a small wrapper; only pay for the subtree query when
-  // the added subtree is small enough to be a wrapper rather than a whole list.
-  return node.childElementCount > 0 && node.childElementCount < 400 && !!node.querySelector?.(MODAL_HINT);
+function areaOf(el) {
+  const rect = el.getBoundingClientRect();
+  return rect.width * rect.height;
+}
+
+/** How much of the viewport an element covers (0..1+). */
+function viewportCover(el) {
+  const rect = el.getBoundingClientRect();
+  const vw = window.innerWidth || 1;
+  const vh = window.innerHeight || 1;
+  return (rect.width * rect.height) / (vw * vh);
 }
 
 /**
  * Attribute changes we care about are class/style flips on a dialog container
- * itself (React showing a modal it had already rendered). React also mutates
+ * itself (React showing a modal it had rendered hidden). React also mutates
  * attributes constantly elsewhere — those must not reach the scanner, which is
  * why the observer carries an attributeFilter and this predicate is pure string
  * work with no layout reads.
  */
 function isDialogRootish(el) {
   return !!el && el.nodeType === 1 && !!el.matches?.(MODAL_HINT);
+}
+
+/** Cheap structural pre-filter: is this element (or its subtree) dialog-shaped? */
+function looksModalish(node) {
+  if (!node || node.nodeType !== 1) return false;
+  if (node.matches?.(MODAL_HINT)) return true;
+  return node.childElementCount > 0 && node.childElementCount < 400 && !!node.querySelector?.(MODAL_HINT);
+}
+
+/* ── recently added elements (trigger-based discovery) ───────────────────── */
+
+/** Remember freshly added elements so a dialog without any recognisable markup
+ *  is still found. Cheap: no layout reads here, only a child-count guard. */
+function rememberAdded(nodes) {
+  for (const node of nodes) {
+    if (node.nodeType !== 1) continue;
+    if (node.childElementCount > 800) continue; // virtual lists, streaming blocks
+    recentAdded.push({ el: node, at: Date.now() });
+  }
+  if (recentAdded.length > RECENT_MAX) recentAdded.splice(0, recentAdded.length - RECENT_MAX);
+}
+
+function recentCandidates() {
+  const now = Date.now();
+  const out = [];
+  for (let i = recentAdded.length - 1; i >= 0 && out.length < 6; i--) {
+    const { el, at } = recentAdded[i];
+    if (now - at > RECENT_TTL_MS || !el.isConnected) continue;
+    out.push(el);
+  }
+  return out;
+}
+
+/** True while the user has just clicked the site's own Settings entry. */
+function probing() {
+  return settingsClickedAt > 0 && Date.now() - settingsClickedAt < RECENT_TTL_MS;
+}
+
+/** A click on the site's own Settings entry marks a probe window. */
+function onDocumentClick(event) {
+  const target = event.target instanceof Element ? event.target : null;
+  if (!target || isOurNode(target)) return;
+
+  // The clicked node may be an icon or a label inside the row: walk up a couple of
+  // levels, but never read text from a container.
+  let node = target;
+  for (let depth = 0; node && depth < 3; depth++, node = node.parentElement) {
+    const text = smallText(node);
+    if (!text) continue;
+    if (SETTINGS_LABELS.some((label) => text === label || text.includes(label))) {
+      settingsClickedAt = Date.now();
+      // The dialog usually mounts a frame later; look for it right away too.
+      scheduleScan();
+      return;
+    }
+  }
 }
 
 /* ── shape detection ─────────────────────────────────────────────────────── */
@@ -235,17 +330,23 @@ function isShareLike(dialog) {
   );
 }
 
-/** Score a candidate dialog; returns null when it is not a settings surface. */
-function classify(dialog) {
+/**
+ * Score a candidate dialog; returns null when it is not a settings surface.
+ * `fromProbe` relaxes the control requirement: a click on the site's own Settings
+ * entry already proves intent, so a rail or a single control is enough.
+ */
+function classify(dialog, fromProbe = false) {
   if (isOurNode(dialog) || dialog.hasAttribute(DIALOG_ATTR)) return null;
 
   const state = stateOf(dialog);
   const now = Date.now();
-  if (state.klass !== null && now - state.klassAt < 1000) return state.klass;
+  if (!fromProbe && state.klass !== null && now - state.klassAt < 1000) return state.klass;
 
   const remember = (value) => {
-    state.klass = value;
-    state.klassAt = now;
+    if (!fromProbe) {
+      state.klass = value;
+      state.klassAt = now;
+    }
     return value;
   };
 
@@ -254,7 +355,7 @@ function classify(dialog) {
   const controls = countControls(dialog);
   const navish = rowsOf(findNavRail(dialog)) >= 3;
 
-  if (!navish && controls < 2) return remember(null);
+  if (!navish && controls < (fromProbe ? 1 : 2)) return remember(null);
 
   const rect = dialog.getBoundingClientRect();
   const tall = rect.height > window.innerHeight * 0.4;
@@ -264,13 +365,46 @@ function classify(dialog) {
   return remember((navish ? 6 : 0) + Math.min(controls, 8) * 2 + (tall ? 2 : 0) + (wide ? 1 : 0));
 }
 
+/**
+ * Resolve a candidate to the dialog “card”: an overlay/backdrop covering the
+ * viewport is unwrapped to the small element inside that holds the rail/controls.
+ */
+function resolveDialog(el) {
+  if (viewportCover(el) < 0.8) return el;
+  return findCardInside(el) || el;
+}
+
+/** Smallest descendant of an overlay that looks like the settings card. */
+function findCardInside(overlay) {
+  const overlayRect = overlay.getBoundingClientRect();
+  const sized = [];
+  let seen = 0;
+
+  for (const el of overlay.querySelectorAll('div, section, form, [role="dialog"]')) {
+    if (++seen > MAX_NODES) break;
+    if (isOurNode(el)) continue;
+    const rect = el.getBoundingClientRect();
+    if (rect.width < 280 || rect.height < 200) continue;
+    if (rect.width > overlayRect.width * 0.99 || rect.height > overlayRect.height * 0.99) continue;
+    sized.push({ el, area: rect.width * rect.height });
+  }
+
+  sized.sort((a, b) => a.area - b.area);
+  for (const { el } of sized.slice(0, 12)) {
+    const rail = findNavRail(el);
+    if (rail && rowsOf(rail) >= 3) return el;
+    if (countControls(el) >= 2) return el;
+  }
+  return null;
+}
+
 /* ── mounting ────────────────────────────────────────────────────────────── */
 
-/** Real scroll containers inside the dialog, deepest last (bounded). */
-function scrollersIn(dialog) {
+/** Real scroll containers inside an element, deepest last (bounded). */
+function scrollersIn(root) {
   const found = [];
   let seen = 0;
-  for (const el of dialog.querySelectorAll("div")) {
+  for (const el of root.querySelectorAll("div")) {
     if (++seen > MAX_NODES) break;
     const style = window.getComputedStyle(el);
     if (
@@ -283,32 +417,42 @@ function scrollersIn(dialog) {
   return found;
 }
 
-/** The column that holds the dialog's controls (the content area). */
-function controlColumn(dialog) {
-  const controls = dialog.querySelectorAll(CONTROL_SELECTOR);
-  if (!controls.length) return null;
-  let node = controls[controls.length - 1];
-  while (node && node.parentElement && node.parentElement !== dialog) node = node.parentElement;
-  return node && node !== dialog ? node : null;
+/** The column that holds the dialog's rows: the area right of the rail. */
+function contentColumn(card, rail) {
+  const kids = [...card.children].filter(
+    (el) => el.nodeType === 1 && !isOurNode(el) && el !== rail && !el.contains(rail)
+  );
+  if (!kids.length) return null;
+  const visible = kids.filter(isVisible);
+  const pool = visible.length ? visible : kids;
+  const withControls = pool.find((el) => el.querySelector(CONTROL_SELECTOR));
+  if (withControls) return withControls;
+  return pool.sort((a, b) => areaOf(b) - areaOf(a))[0] || null;
 }
 
-/** Containers to try, best first. */
-function mountTargets(dialog) {
+/** Containers to try, best first: the site's own content column wins. */
+function mountTargets(card) {
+  const rail = findNavRail(card);
+  const column = contentColumn(card, rail);
   const targets = [];
   const push = (el) => {
     if (el && el.isConnected && !targets.includes(el)) targets.push(el);
   };
 
-  push(dialog.querySelector(".ds-modal-content__main"));
-  for (const el of scrollersIn(dialog).slice(-2).reverse()) push(el);
-  push(controlColumn(dialog));
-  push(dialog);
+  if (column) {
+    // A scroller inside the column lets the site's own scrolling carry the panel.
+    for (const scroller of scrollersIn(column)) push(scroller);
+    push(column);
+  }
+  push(card.querySelector(".ds-modal-content__main"));
+  for (const scroller of scrollersIn(card)) push(scroller);
+  push(card);
   return targets;
 }
 
 /**
- * Keep this copy's labels pointing at this copy's controls: the drawer can mount a
- * second SettingsPanel, so `id`s may be duplicated between the two surfaces.
+ * Keep this copy's labels pointing at this copy's controls: the drawer can mount
+ * a second SettingsPanel, so `id`s may be duplicated between the two surfaces.
  */
 function scopeLabelTargets(root) {
   for (const label of root.querySelectorAll("label[for]")) {
@@ -325,6 +469,32 @@ function scopeLabelTargets(root) {
   }
 }
 
+/**
+ * Proof of placement: a host that reports a size but sits outside the card (a
+ * clipped flex child, a hidden tab pane) is useless — measure instead of assume.
+ */
+function placementOk(host, card) {
+  const rect = host.getBoundingClientRect();
+  const cardRect = card.getBoundingClientRect();
+  if (rect.width < 120 || rect.height < 24) return false;
+  if (rect.top > cardRect.bottom - 24) return false;
+  if (rect.bottom < cardRect.top + 24) return false;
+  if (rect.right < cardRect.left + 40 || rect.left > cardRect.right - 40) return false;
+  return true;
+}
+
+/** Give the host its own scroll if the dialog is too short to show the panel. */
+function fitHost(host, card) {
+  const rect = host.getBoundingClientRect();
+  const cardRect = card.getBoundingClientRect();
+  const available = Math.max(160, cardRect.bottom - rect.top - 12);
+  if (rect.height > available) {
+    host.style.maxHeight = `${Math.round(available)}px`;
+    host.style.overflowY = "auto";
+    host.style.overscrollBehavior = "contain";
+  }
+}
+
 /** Mount into the first container that actually lays the panel out. */
 function mountPanel(dialog) {
   if (hostEl && hostEl.isConnected && currentDialog === dialog) return;
@@ -336,14 +506,12 @@ function mountPanel(dialog) {
   cleanupPanel();
 
   // Backoff between attempts on the same dialog so React churn cannot turn this
-  // into a mount/unmount loop (the previous revision's second freeze source).
-  if (state.attempts > 0 && now - state.lastAttemptAt < 1500) return;
+  // into a mount/unmount loop.
+  if (state.attempts > 0 && now - state.lastAttemptAt < 1200) return;
   state.attempts += 1;
   state.lastAttemptAt = now;
 
   for (const target of mountTargets(dialog)) {
-    // Skip containers that cannot be showing anything: a hidden tab pane or a
-    // display:none wrapper. This avoids mounting the (large) panel to find out.
     if (!isVisible(target) || target.clientHeight < 60) continue;
 
     const host = document.createElement("div");
@@ -361,18 +529,22 @@ function mountPanel(dialog) {
       continue;
     }
 
-    const rect = host.getBoundingClientRect();
-    if (rect.height >= 24 && rect.width >= 40) {
+    if (placementOk(host, dialog)) {
+      fitHost(host, dialog);
       currentDialog = dialog;
       dialog.setAttribute(DIALOG_ATTR, "1");
       hostEl = host;
       panelInstance = instance;
       everMounted = true;
+      state.mounted = true;
+      // A successful mount resets the budget so tab switches can re-place it.
+      state.attempts = 0;
+      dialogState.set(dialog, state);
       document.documentElement.setAttribute(PAGE_ATTR, "available");
       return;
     }
 
-    // Placement did not lay out (clipped wrapper) — undo it and try the next one.
+    // Placement did not lay out inside the card — undo it and try the next one.
     try {
       unmount(instance);
     } catch (_) {
@@ -404,20 +576,30 @@ function cleanupPanel() {
 
 /* ── scanning ────────────────────────────────────────────────────────────── */
 
-/** Candidate dialogs, cheap selectors first; the class sweep is rate-limited. */
+/** Candidate dialogs: cheap selectors, then recently added elements, then sweep. */
 function candidates() {
   const list = [];
   const push = (el) => {
-    if (!isOurNode(el) && isVisible(el)) list.push(el);
+    if (el instanceof Element && !isOurNode(el) && isVisible(el) && !list.includes(el)) list.push(el);
   };
 
   for (const el of document.querySelectorAll(DIALOG_SELECTOR_FAST)) push(el);
+
+  const probingNow = probing();
+  if (list.length < 2 || probingNow) {
+    for (const el of recentCandidates()) {
+      // During a probe window anything big counts; otherwise it must be large
+      // enough to be meant as a dialog rather than a chat bubble.
+      if (probingNow || viewportCover(el) >= 0.12) push(el);
+      if (list.length >= 8) break;
+    }
+  }
 
   if (!list.length) {
     const now = Date.now();
     if (now - lastSweepAt > 1000) {
       lastSweepAt = now;
-      for (const el of document.querySelectorAll('[class*="modal" i]')) {
+      for (const el of document.querySelectorAll('[class*="modal" i], [class*="dialog" i]')) {
         if (list.length >= 8) break;
         push(el);
       }
@@ -432,6 +614,8 @@ function scan() {
 
   scanning = true;
   try {
+    pruneState();
+
     // Already mounted and the dialog is still alive → nothing to do.
     if (
       hostEl &&
@@ -443,17 +627,25 @@ function scan() {
       return;
     }
 
-    // Stale instance (dialog closed or React removed our node).
+    // Stale instance (dialog closed, tab switched, or React removed our node).
     if (hostEl && (!hostEl.isConnected || !currentDialog || !currentDialog.isConnected)) {
       cleanupPanel();
     }
 
+    const probingNow = probing();
     let best = null;
     let bestScore = 0;
+    const unresolved = [];
+
     for (const candidate of candidates()) {
-      const score = classify(candidate);
-      if (score !== null && score > bestScore) {
-        best = candidate;
+      const card = resolveDialog(candidate);
+      const score = classify(card, probingNow);
+      if (score === null) {
+        unresolved.push(candidate);
+        continue;
+      }
+      if (score > bestScore) {
+        best = card;
         bestScore = score;
       }
     }
@@ -463,9 +655,9 @@ function scan() {
       return;
     }
 
-    // Nothing matched: when a modal-looking surface is open, say so once per
+    // Nothing matched: when a dialog-looking surface is open, say so once per
     // surface so the user can send us its shape instead of guessing.
-    for (const candidate of candidates()) {
+    for (const candidate of unresolved) {
       if (warnedCandidates.has(candidate)) continue;
       warnedCandidates.add(candidate);
       console.info(
@@ -511,10 +703,13 @@ function summarize(el) {
     role: el.getAttribute("role") || undefined,
     class: classNameOf(el).slice(0, 200) || undefined,
     size: [Math.round(rect.width), Math.round(rect.height)],
+    at: [Math.round(rect.left), Math.round(rect.top)],
+    viewportCover: Number(viewportCover(el).toFixed(2)),
     controls: el.querySelectorAll(CONTROL_SELECTOR).length,
     controlsLoose: countControls(el),
     rail: rail ? { rows: rowsOf(rail), class: classNameOf(rail).slice(0, 120) } : null,
     attempts: state.attempts,
+    mounted: state.mounted,
     text: (el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 160),
     children: [...el.children].slice(0, 8).map((child) => {
       const cls = classNameOf(child).split(/\s+/).filter(Boolean).slice(0, 2).join(".");
@@ -525,14 +720,43 @@ function summarize(el) {
 
 function diagnostics() {
   const rect = hostEl?.getBoundingClientRect();
+  const card = currentDialog;
+  const cardRect = card?.getBoundingClientRect();
   return {
     url: location.href,
     theme: document.body?.hasAttribute("data-ds-dark-theme") ? "dark" : "light",
+    probing: probing(),
+    settingsClickedAgoMs: settingsClickedAt ? Date.now() - settingsClickedAt : null,
     mounted: hostEl
-      ? { connected: hostEl.isConnected, size: rect ? [Math.round(rect.width), Math.round(rect.height)] : null }
+      ? {
+          connected: hostEl.isConnected,
+          size: rect ? [Math.round(rect.width), Math.round(rect.height)] : null,
+          at: rect ? [Math.round(rect.left), Math.round(rect.top)] : null,
+          parentClass: classNameOf(hostEl.parentElement || {}).slice(0, 120),
+          fitted: !!hostEl.style.maxHeight,
+          cardSize: cardRect ? [Math.round(cardRect.width), Math.round(cardRect.height)] : null,
+        }
       : null,
-    dialogs: candidates().map((el) => ({ ...summarize(el), recognised: classify(el) !== null })),
+    candidates: candidates().map((el) => {
+      const resolved = resolveDialog(el);
+      return {
+        raw: summarize(el),
+        resolvedIsSame: resolved === el,
+        resolved: resolved === el ? undefined : summarize(resolved),
+        recognised: classify(resolved, true) !== null,
+      };
+    }),
   };
+}
+
+/** Clear every cache/attempt counter and scan immediately (console helper). */
+function force() {
+  dialogState.clear();
+  warnedCandidates.clear();
+  settingsClickedAt = Date.now();
+  lastScanAt = 0;
+  scan();
+  return diagnostics();
 }
 
 /* ── public API ──────────────────────────────────────────────────────────── */
@@ -544,8 +768,8 @@ function diagnostics() {
 export function initNativeSettings() {
   if (observer) return;
 
-  // childList only: attribute mutations fire constantly on this site and used to
-  // turn every React re-render into a full scan (see the header note).
+  // childList + a filtered attribute set: unfiltered attribute observation fires
+  // thousands of times per second on this site and used to pin the main thread.
   observer = new MutationObserver((mutations) => {
     let interesting = false;
     for (const mutation of mutations) {
@@ -554,15 +778,13 @@ export function initNativeSettings() {
         break;
       }
       if (mutation.type === "attributes") {
-        // Only a dialog container flipping its own class/style matters (e.g. the
-        // site showing a modal it had rendered hidden). Everything else React
-        // touches is ignored before any layout work happens.
         if (isDialogRootish(mutation.target)) {
           interesting = true;
           break;
         }
         continue;
       }
+      rememberAdded(mutation.addedNodes);
       for (const node of mutation.addedNodes) {
         if (looksModalish(node)) {
           interesting = true;
@@ -578,7 +800,7 @@ export function initNativeSettings() {
       }
       if (interesting) break;
     }
-    if (interesting) scheduleScan();
+    if (interesting || probing()) scheduleScan();
   });
 
   observer.observe(document.body, {
@@ -599,9 +821,6 @@ export function initNativeSettings() {
       scheduleScan();
       return;
     }
-    // Nothing dialog-shaped by the fast selectors: sweep occasionally so markup
-    // that only uses hashed class names is still found. This is a full traversal,
-    // hence the long interval.
     const now = Date.now();
     if (now - lastSweepHeartbeatAt > SWEEP_HEARTBEAT_MS) {
       lastSweepHeartbeatAt = now;
@@ -609,12 +828,15 @@ export function initNativeSettings() {
     }
   }, HEARTBEAT_MS);
 
+  document.addEventListener("click", onDocumentClick, true);
+
   scheduleScan();
 
   try {
     window.__BDS_DIAG__ = {
       dump: diagnostics,
       scan,
+      force,
       get mounted() {
         return !!hostEl;
       },
@@ -635,6 +857,7 @@ export function destroyNativeSettings() {
   }
   clearTimeout(scanTimer);
   scanQueued = false;
+  document.removeEventListener("click", onDocumentClick, true);
   cleanupPanel();
   try {
     delete window.__BDS_DIAG__;
@@ -645,8 +868,6 @@ export function destroyNativeSettings() {
 
 /* ── opening the site's own settings ─────────────────────────────────────── */
 
-const SETTINGS_LABELS = ["Settings", "设置", "Настройки", "Ayarlar", "تنظیمات"];
-
 /** Our own injected rows must never be mistaken for the site's Settings entry. */
 function isBdsInjected(node) {
   return /(^|\s)bds-/.test(classNameOf(node));
@@ -654,8 +875,8 @@ function isBdsInjected(node) {
 
 function looksLikeSettingsItem(node) {
   if (isOurNode(node) || isBdsInjected(node) || !isVisible(node)) return false;
-  const text = (node.textContent || "").trim();
-  if (!text || text.length > 40) return false;
+  const text = smallText(node);
+  if (!text) return false;
   return SETTINGS_LABELS.some((label) => text === label || text.includes(label));
 }
 
@@ -701,6 +922,7 @@ function findAccountButton() {
 export function openNativeSettings() {
   const direct = findSettingsItem();
   if (direct) {
+    settingsClickedAt = Date.now();
     direct.click();
     return true;
   }
@@ -711,7 +933,10 @@ export function openNativeSettings() {
   account.click();
   setTimeout(() => {
     const item = findSettingsItem();
-    if (item) item.click();
+    if (item) {
+      settingsClickedAt = Date.now();
+      item.click();
+    }
   }, 180);
   return true;
 }
@@ -719,21 +944,35 @@ export function openNativeSettings() {
 // Re-export for tests / debugging.
 export const __nativeSettingsInternals = {
   classify,
+  resolveDialog,
+  findCardInside,
   findNavRail,
   countControls,
+  contentColumn,
   mountTargets,
   looksModalish,
+  isDialogRootish,
+  placementOk,
   summarize,
   diagnostics,
   scan,
   scheduleScan,
+  force,
   observerConfig: {
     childList: true,
     subtree: true,
     attributes: true,
     attributeFilter: ["class", "style", "hidden", "aria-hidden"],
   },
-  guards: { SCAN_DEBOUNCE_MS, SCAN_MIN_INTERVAL_MS, HEARTBEAT_MS, SWEEP_HEARTBEAT_MS, MAX_NODES, MAX_ATTEMPTS_PER_DIALOG },
+  guards: {
+    SCAN_DEBOUNCE_MS,
+    SCAN_MIN_INTERVAL_MS,
+    HEARTBEAT_MS,
+    SWEEP_HEARTBEAT_MS,
+    MAX_NODES,
+    MAX_ATTEMPTS_PER_DIALOG,
+    RECENT_TTL_MS,
+  },
   HOST_ATTR,
   PAGE_ATTR,
   MODAL_HINT,

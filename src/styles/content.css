@@ -75,6 +75,24 @@
 /* ── Toggle Pill ──
    Mirrors DeepSeek's floating chips: elevated surface, hairline border,
    native radius, hover fill — no scale/opacity tricks. */
+/* Host for the settings panel injected into DeepSeek's own Settings dialog.
+   The panel is fitted to the free height at mount time (inline max-height +
+   overflow), so a short dialog scrolls inside this host instead of clipping it. */
+.bds-native-settings-host {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 12px 0 4px;
+  color: var(--bds-text-primary);
+  font-family: inherit;
+}
+
+.bds-native-settings-host > * {
+  box-sizing: border-box;
+}
+
 #bds-toggle {
   display: inline-flex;
   align-items: center;

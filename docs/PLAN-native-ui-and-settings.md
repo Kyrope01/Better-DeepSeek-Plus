@@ -145,6 +145,13 @@ base type, radius from `--dsw-radius-*` (site fallback 10px for controls, 18px f
   visible wording (“Settings”, “设置”, “Настройки”, “Ayarlar”, “تنظیمات”), constrained to
   menu items inside the sidebar or a dropdown, and clicks the account button first when
   no menu is open.
+* **Discovery** (markup-independent): a click on the site's own “Settings” entry opens a
+  probe window, freshly added large elements are treated as dialog candidates, and an
+  overlay/backdrop covering the viewport is unwrapped to the smallest descendant that has
+  a rail or two controls. The panel is then appended to the dialog's content column (the
+  area right of the rail) and the placement is *measured* — a host that reports a size but
+  sits outside the card is rejected, and an accepted host is fitted to the free height with
+  its own scroll so a short dialog cannot clip it out of sight.
 * **Performance contract** (a real-account freeze taught this the hard way): observe
   `childList` plus a filtered attribute set only, debounce 150 ms, rate-limit 500 ms,
   bound every DOM walk (`MAX_NODES`), cache classification/rail per dialog, cap mount
