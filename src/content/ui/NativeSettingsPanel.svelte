@@ -221,8 +221,11 @@
   }
 
   .bds-ns-floating {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     padding: 8px 0 4px;
-    border-bottom: none;
   }
 
   .bds-ns-panel {
