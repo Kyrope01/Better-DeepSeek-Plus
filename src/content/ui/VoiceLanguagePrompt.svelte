@@ -58,8 +58,8 @@
     z-index: 2147483647;
   }
   .bds-vlp-dialog {
-    background: var(--bds-bg-panel, #1e1f23);
-    border: 1px solid var(--bds-border, #333);
+    background: var(--bds-bg-panel, var(--bds-surface));
+    border: 1px solid var(--bds-border, var(--bds-text-primary));
     border-radius: var(--bds-radius, 14px);
     padding: 24px;
     max-width: 420px;
@@ -70,13 +70,13 @@
     margin: 0 0 8px;
     font-size: 15px;
     font-weight: 700;
-    color: var(--bds-text-primary, #e5e5e5);
+    color: var(--bds-text-primary, var(--bds-border));
   }
   .bds-vlp-hint {
     margin: 0 0 16px;
     font-size: 12px;
     line-height: 1.5;
-    color: var(--bds-text-secondary, #8e8ea0);
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
   }
   .bds-vlp-actions {
     display: flex;

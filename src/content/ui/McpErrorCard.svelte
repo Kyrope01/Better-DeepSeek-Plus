@@ -50,7 +50,7 @@
 <style>
   .bds-mcp-error-card {
     margin: 8px 0;
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    border: 1px solid var(--bds-danger-soft);
     border-radius: 12px;
     background: var(--bds-bg-panel);
     overflow: hidden;
@@ -76,10 +76,10 @@
     justify-content: center;
     width: 34px;
     height: 34px;
-    background-color: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.25);
+    background-color: var(--bds-danger-soft);
+    border: 1px solid var(--bds-danger-soft);
     border-radius: 8px;
-    color: #ef4444;
+    color: var(--bds-danger);
     flex-shrink: 0;
   }
 
@@ -87,7 +87,7 @@
     margin: 0;
     font-size: 13px;
     font-weight: 600;
-    color: #ef4444;
+    color: var(--bds-danger);
   }
 
   .bds-mcp-error-details p {
@@ -101,8 +101,8 @@
 
   .bds-mcp-error-badge {
     display: inline-block;
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
+    background: var(--bds-danger-soft);
+    color: var(--bds-danger);
     padding: 1px 6px;
     border-radius: 4px;
     font-size: 10px;
@@ -115,7 +115,7 @@
   }
 
   .bds-mcp-error-body {
-    border-top: 1px solid rgba(239, 68, 68, 0.15);
+    border-top: 1px solid var(--bds-danger-soft);
     padding: 10px 14px;
   }
 
@@ -124,8 +124,8 @@
     color: var(--bds-text-primary);
     line-height: 1.5;
     padding: 8px 10px;
-    background: rgba(239, 68, 68, 0.06);
-    border: 1px solid rgba(239, 68, 68, 0.15);
+    background: var(--bds-danger-soft);
+    border: 1px solid var(--bds-danger-soft);
     border-radius: 8px;
     font-family: ui-monospace, "SFMono-Regular", monospace;
     white-space: pre-wrap;

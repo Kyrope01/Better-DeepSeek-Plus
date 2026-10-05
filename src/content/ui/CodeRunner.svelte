@@ -187,10 +187,10 @@
     flex-shrink: 0;
   }
 
-  .bds-runner-icon.python { color: #10b981; }
-  .bds-runner-icon.lua { color: #a855f7; }
-  .bds-runner-icon.ruby { color: #dc2626; }
-  .bds-runner-icon.js { color: #f59e0b; }
+  .bds-runner-icon.python { color: var(--bds-success); }
+  .bds-runner-icon.lua { color: var(--bds-accent); }
+  .bds-runner-icon.ruby { color: var(--bds-danger); }
+  .bds-runner-icon.js { color: var(--bds-warning); }
 
   .bds-title-group {
     display: flex;
@@ -271,7 +271,7 @@
   .bds-run-btn {
     width: 100%;
     background: var(--bds-accent);
-    color: #ffffff;
+    color: var(--bds-surface);
     border: none;
     border-radius: 10px;
     padding: 10px 16px;
@@ -353,23 +353,23 @@
   }
 
   .bds-log-line.error { color: var(--bds-danger); }
-  .bds-log-line.warn { color: #f59e0b; }
+  .bds-log-line.warn { color: var(--bds-warning); }
   .bds-log-line.dim { color: var(--bds-text-tertiary); }
 
   .bds-spinner {
     width: 14px;
     height: 14px;
     border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: #fff;
+    border-top-color: var(--bds-surface);
     border-radius: 50%;
     animation: bds-spin 0.8s linear infinite;
   }
 
   @keyframes bds-spin {
     to { transform: rotate(360deg); }
-  }
-
-  :global(.dark) .bds-output-header {
+  }:global(body[data-ds-dark-theme]) .bds-output-header,
+  :global(body.dark) .bds-output-header,
+  :global(html.dark) .bds-output-header {
     background: rgba(255, 255, 255, 0.03);
   }
 </style>

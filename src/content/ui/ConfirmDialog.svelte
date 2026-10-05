@@ -27,8 +27,8 @@
     z-index: 2147483647;
   }
   .bds-confirm-dialog {
-    background: var(--bds-bg-panel, #1e1f23);
-    border: 1px solid var(--bds-border, #333);
+    background: var(--bds-bg-panel, var(--bds-surface));
+    border: 1px solid var(--bds-border, var(--bds-text-primary));
     border-radius: var(--bds-radius, 14px);
     padding: 24px;
     max-width: 420px;
@@ -39,7 +39,7 @@
     margin: 0 0 20px;
     font-size: 14px;
     line-height: 1.5;
-    color: var(--bds-text-primary, #e5e5e5);
+    color: var(--bds-text-primary, var(--bds-border));
     word-break: break-word;
   }
   .bds-confirm-actions {

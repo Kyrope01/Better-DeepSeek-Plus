@@ -122,7 +122,7 @@
   }
 
   .bds-search-icon-results {
-    color: #22c55e;
+    color: var(--bds-success);
   }
 
   .bds-search-details {
@@ -241,7 +241,7 @@
     padding: 0;
     background: transparent;
     border: none;
-    color: #22c55e;
+    color: var(--bds-success);
     font-size: 10.5px;
     cursor: pointer;
     text-decoration: underline;
@@ -260,6 +260,6 @@
     margin: 4px 0 0;
     font-size: 11px;
     line-height: 1.35;
-    color: var(--bds-warning, #d97706);
+    color: var(--bds-warning, var(--bds-warning));
   }
 </style>

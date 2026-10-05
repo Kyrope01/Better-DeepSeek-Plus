@@ -118,9 +118,9 @@
     border-top: 1px solid var(--bds-border);
     padding-top: 10px;
     background: rgba(0,0,0,0.01);
-  }
-
-  :global(.dark) .bds-result-output {
+  }:global(body[data-ds-dark-theme]) .bds-result-output,
+  :global(body.dark) .bds-result-output,
+  :global(html.dark) .bds-result-output {
     background: rgba(255,255,255,0.01);
   }
 

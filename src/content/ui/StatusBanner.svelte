@@ -67,9 +67,11 @@
   }
 
   /* DeepSeek usually has a dark theme mode */
-  :global(.dark) .ds-status-banner {
+  :global(body[data-ds-dark-theme]) .ds-status-banner,
+  :global(body.dark) .ds-status-banner,
+  :global(html.dark) .ds-status-banner {
     background: var(--ds-bg-nav, rgba(30, 30, 33, 0.9));
-    color: var(--ds-text-primary, #fff);
+    color: var(--ds-text-primary, var(--bds-surface));
     border-color: var(--ds-border-color, rgba(255, 255, 255, 0.1));
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   }
@@ -87,13 +89,13 @@
   }
 
   /* DeepSeek native status colors */
-  .ds-status-minor .ds-status-icon { color: var(--ds-warning-color, #eab308); }
+  .ds-status-minor .ds-status-icon { color: var(--ds-warning-color, var(--bds-warning)); }
   .ds-status-major .ds-status-icon { color: var(--ds-warning-color, #f97316); }
-  .ds-status-critical .ds-status-icon { color: var(--ds-error-color, #ef4444); }
-  .ds-status-maintenance .ds-status-icon { color: var(--ds-warning-color, #eab308); }
+  .ds-status-critical .ds-status-icon { color: var(--ds-error-color, var(--bds-danger)); }
+  .ds-status-maintenance .ds-status-icon { color: var(--ds-warning-color, var(--bds-warning)); }
 
   .ds-status-critical {
-    border-color: var(--ds-error-color, rgba(239, 68, 68, 0.4));
+    border-color: var(--ds-error-color, var(--bds-danger-soft));
   }
 
   .ds-status-major,
@@ -116,9 +118,9 @@
     font-size: 12px;
     color: var(--ds-text-secondary, rgba(0, 0, 0, 0.6));
     line-height: 1.5;
-  }
-
-  :global(.dark) .ds-status-message {
+  }:global(body[data-ds-dark-theme]) .ds-status-message,
+  :global(body.dark) .ds-status-message,
+  :global(html.dark) .ds-status-message {
     color: var(--ds-text-secondary, rgba(255, 255, 255, 0.6));
   }
 </style>

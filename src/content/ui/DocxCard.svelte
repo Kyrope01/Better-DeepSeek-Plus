@@ -180,10 +180,10 @@
     border-radius: var(--bds-radius);
     background: var(--bds-bg-panel);
     overflow: hidden;
-  }
-
-  :global(.dark) .bds-docx-card {
-    --docx-icon-bg: #1e3a8a;
+  }:global(body[data-ds-dark-theme]) .bds-docx-card,
+  :global(body.dark) .bds-docx-card,
+  :global(html.dark) .bds-docx-card {
+    --docx-icon-bg: var(--bds-accent);
     --docx-icon-color: #60a5fa;
   }
 
@@ -253,11 +253,11 @@
 
   .bds-docx-script-toggle {
     padding: 0 16px 12px;
-    border-top: 1px solid var(--ds-border-1, #f0f0f0);
+    border-top: 1px solid var(--ds-border-1, var(--bds-surface-subtle));
     padding-top: 10px;
-  }
-
-  :global(.dark) .bds-docx-script-toggle {
+  }:global(body[data-ds-dark-theme]) .bds-docx-script-toggle,
+  :global(body.dark) .bds-docx-script-toggle,
+  :global(html.dark) .bds-docx-script-toggle {
     border-top-color: var(--bds-border);
   }
 

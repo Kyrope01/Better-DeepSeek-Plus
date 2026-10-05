@@ -263,6 +263,6 @@
   .bds-delete-btn:hover {
     color: var(--bds-danger);
     border-color: var(--bds-danger);
-    background: rgba(239, 68, 68, 0.08);
+    background: var(--bds-danger-soft);
   }
 </style>

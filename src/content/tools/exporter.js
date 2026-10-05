@@ -12,6 +12,7 @@ import { t } from "../../lib/i18n.svelte.js";
 import html2canvas from "html2canvas";
 import { loadAllHistory, isLoadInProgress } from "../load-all-history.js";
 import state from "../state.js";
+import { isPageDark } from "../../lib/page-theme.js";
 
 const MAX_CANVAS_DIMENSION = 32767;
 const EXPORT_SCALE = 2;
@@ -186,9 +187,7 @@ function formatAssistantContent(content) {
 }
 
 function isDarkMode() {
-  return document.documentElement.classList.contains("dark") || 
-         document.body.classList.contains("dark") ||
-         window.matchMedia("(prefers-color-scheme: dark)").matches;
+  return isPageDark();
 }
 
 /**

@@ -236,13 +236,13 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
 
 <style>
   .bds-visualizer-card {
-    border: 1px solid var(--bds-border, #d1d5db);
+    border: 1px solid var(--bds-border, var(--bds-border-strong));
     border-radius: 8px;
-    background: var(--bds-bg-panel, #ffffff);
+    background: var(--bds-bg-panel, var(--bds-surface));
     padding: 12px;
     margin: 10px 0;
     font-family: inherit;
-    color: var(--bds-text-primary, #111);
+    color: var(--bds-text-primary, var(--bds-text-primary));
     height: 600px;
     display: flex;
     flex-direction: column;
@@ -251,7 +251,7 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
 
   .bds-visualizer-header {
     margin-bottom: 8px;
-    border-bottom: 1px solid var(--bds-border, #e5e7eb);
+    border-bottom: 1px solid var(--bds-border, var(--bds-border));
     padding-bottom: 6px;
     flex-shrink: 0;
     display: flex;
@@ -269,14 +269,14 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
     font-size: 11px;
     font-weight: 900;
     text-transform: uppercase;
-    color: #1e3a8a;
+    color: var(--bds-accent);
     letter-spacing: 0.05em;
   }
 
   .bds-visualizer-header-left p {
     margin: 0;
     font-size: 10px;
-    color: #666;
+    color: var(--bds-text-secondary);
   }
 
   .bds-visualizer-header-actions {
@@ -300,27 +300,27 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
   }
 
   .bds-visualizer-feedback-btn.warning {
-    border: 1px solid rgba(245, 158, 11, 0.4);
-    background: rgba(245, 158, 11, 0.08);
-    color: #d97706;
+    border: 1px solid var(--bds-warning-soft);
+    background: var(--bds-warning-soft);
+    color: var(--bds-warning);
   }
 
   .bds-visualizer-feedback-btn.warning:hover {
-    background: rgba(245, 158, 11, 0.18);
-    border-color: #f59e0b;
-    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15);
+    background: var(--bds-warning-soft);
+    border-color: var(--bds-warning);
+    box-shadow: 0 2px 6px var(--bds-warning-soft);
   }
 
   .bds-visualizer-feedback-btn.error {
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    background: rgba(239, 68, 68, 0.08);
-    color: #dc2626;
+    border: 1px solid var(--bds-danger-soft);
+    background: var(--bds-danger-soft);
+    color: var(--bds-danger);
   }
 
   .bds-visualizer-feedback-btn.error:hover {
-    background: rgba(239, 68, 68, 0.18);
-    border-color: #ef4444;
-    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.15);
+    background: var(--bds-danger-soft);
+    border-color: var(--bds-danger);
+    box-shadow: 0 2px 6px var(--bds-danger-soft);
   }
 
   .bds-visualizer-panel-btn {
@@ -328,7 +328,7 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
     align-items: center;
     gap: 6px;
     padding: 6px 10px;
-    border: 1px solid var(--bds-border, #d1d5db);
+    border: 1px solid var(--bds-border, var(--bds-border-strong));
     border-radius: 6px;
     background: transparent;
     color: var(--bds-text-primary, #000);
@@ -342,16 +342,16 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
 
   .bds-visualizer-panel-btn:hover {
     background: var(--bds-bg-hover, rgba(0,0,0,0.05));
-    border-color: var(--bds-accent, #1e3a8a);
-    color: var(--bds-accent, #1e3a8a);
+    border-color: var(--bds-accent, var(--bds-accent));
+    color: var(--bds-accent, var(--bds-accent));
   }
 
   /* ── Sleek Popover Menu ── */
   .bds-visualizer-menu {
-    border: 1px solid var(--bds-border, #e4e4e7);
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 10px;
-    background: var(--bds-bg-panel, #ffffff);
-    color: var(--bds-text-primary, #18181b);
+    background: var(--bds-bg-panel, var(--bds-surface));
+    color: var(--bds-text-primary, var(--bds-text-primary));
     padding: 12px 14px;
     margin-bottom: 10px;
     font-size: 12px;
@@ -389,7 +389,7 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
   .bds-menu-close-btn {
     border: none;
     background: transparent;
-    color: var(--bds-text-tertiary, #a1a1aa);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
     cursor: pointer;
     font-size: 13px;
     padding: 2px 4px;
@@ -398,7 +398,7 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
   }
 
   .bds-menu-close-btn:hover {
-    color: var(--bds-text-primary, #111);
+    color: var(--bds-text-primary, var(--bds-text-primary));
     background: var(--bds-bg-hover, rgba(0,0,0,0.05));
   }
 
@@ -413,25 +413,25 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
     align-items: center;
     gap: 10px;
     padding: 8px 10px;
-    border: 1px solid var(--bds-border, #e4e4e7);
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 7px;
-    background: var(--bds-bg, #fafafa);
+    background: var(--bds-bg, var(--bds-surface-subtle));
     cursor: pointer;
     transition: all 0.15s ease;
   }
 
   .bds-menu-option-card:hover {
-    background: var(--bds-bg-hover, #f4f4f5);
-    border-color: rgba(245, 158, 11, 0.4);
+    background: var(--bds-bg-hover, var(--bds-surface-subtle));
+    border-color: var(--bds-warning-soft);
   }
 
   .bds-menu-option-card.active {
-    border-color: #f59e0b;
-    background: rgba(245, 158, 11, 0.06);
+    border-color: var(--bds-warning);
+    background: var(--bds-warning-soft);
   }
 
   .bds-menu-option-card input[type="radio"] {
-    accent-color: #f59e0b;
+    accent-color: var(--bds-warning);
     cursor: pointer;
     margin: 0;
   }
@@ -448,11 +448,11 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
     width: 100%;
     box-sizing: border-box;
     padding: 8px 10px;
-    border: 1px solid var(--bds-border, #d4d4d8);
+    border: 1px solid var(--bds-border, var(--bds-border-strong));
     border-radius: 7px;
     font-family: inherit;
     font-size: 11px;
-    background: var(--bds-bg, #ffffff);
+    background: var(--bds-bg, var(--bds-surface));
     color: inherit;
     resize: vertical;
     outline: none;
@@ -460,8 +460,8 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
   }
 
   .bds-menu-textarea:focus {
-    border-color: #f59e0b;
-    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15);
+    border-color: var(--bds-warning);
+    box-shadow: 0 0 0 2px var(--bds-warning-soft);
   }
 
   .bds-menu-actions {
@@ -473,10 +473,10 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
 
   .bds-menu-cancel {
     padding: 5px 12px;
-    border: 1px solid var(--bds-border, #d4d4d8);
+    border: 1px solid var(--bds-border, var(--bds-border-strong));
     border-radius: 6px;
     background: transparent;
-    color: var(--bds-text-primary, #3f3f46);
+    color: var(--bds-text-primary, var(--bds-border-strong));
     font-size: 11px;
     font-weight: 500;
     cursor: pointer;
@@ -491,19 +491,19 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
     padding: 6px 14px;
     border: none;
     border-radius: 6px;
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--bds-warning), var(--bds-warning));
+    color: var(--bds-surface);
     font-size: 11px;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(245, 158, 11, 0.25);
+    box-shadow: 0 2px 5px var(--bds-warning-soft);
     transition: all 0.15s ease;
   }
 
   .bds-menu-submit:hover {
-    background: linear-gradient(135deg, #d97706, #b45309);
+    background: linear-gradient(135deg, var(--bds-warning), #b45309);
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 4px 8px var(--bds-warning-soft);
   }
 
   .bds-menu-submit:disabled {
@@ -513,7 +513,7 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
   }
 
   .bds-menu-error {
-    color: #ef4444;
+    color: var(--bds-danger);
     font-size: 11px;
     margin: 0;
   }
@@ -526,8 +526,8 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
   .bds-visualizer-frame {
     width: 100%;
     height: 100%;
-    border: 1px solid var(--bds-border, #d1d5db);
-    background: #fff;
+    border: 1px solid var(--bds-border, var(--bds-border-strong));
+    background: var(--bds-surface);
     display: block;
     overflow: hidden;
     border-radius: 6px;
@@ -535,86 +535,86 @@ Please consider the issue and regenerate the <BDS:VISUALIZER> code.
 
   .bds-visualizer-frame::-webkit-scrollbar {
     display: none;
-  }
-
-  :global(.dark) .bds-visualizer-card {
-    background: #111;
-    border-color: #333;
-    color: #ececec;
-  }
-
-  :global(.dark) .bds-visualizer-header-left h4 {
-    color: #60a5fa;
-  }
-
-  :global(.dark) .bds-visualizer-header-left p {
-    color: #9ca3af;
-  }
-
-  :global(.dark) .bds-visualizer-panel-btn {
+  }:global(body[data-ds-dark-theme]) .bds-visualizer-card,
+  :global(body.dark) .bds-visualizer-card,
+  :global(html.dark) .bds-visualizer-card {
+    background: var(--bds-text-primary);
+    border-color: var(--bds-text-primary);
+    color: var(--bds-surface-subtle);
+  }:global(body[data-ds-dark-theme]) .bds-visualizer-header-left h4,
+  :global(body.dark) .bds-visualizer-header-left h4,
+  :global(html.dark) .bds-visualizer-header-left h4 {
+    color: var(--bds-text-strong);
+  }:global(body[data-ds-dark-theme]) .bds-visualizer-header-left p,
+  :global(body.dark) .bds-visualizer-header-left p,
+  :global(html.dark) .bds-visualizer-header-left p {
+    color: var(--bds-text-tertiary);
+  }:global(body[data-ds-dark-theme]) .bds-visualizer-panel-btn,
+  :global(body.dark) .bds-visualizer-panel-btn,
+  :global(html.dark) .bds-visualizer-panel-btn {
     border-color: #444;
-    color: var(--bds-text-primary, #ececec);
-  }
-
-  :global(.dark) .bds-visualizer-panel-btn:hover {
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
+  }:global(body[data-ds-dark-theme]) .bds-visualizer-panel-btn:hover,
+  :global(body.dark) .bds-visualizer-panel-btn:hover,
+  :global(html.dark) .bds-visualizer-panel-btn:hover {
     background: rgba(255,255,255,0.08);
-  }
-
-  :global(.dark) .bds-visualizer-feedback-btn.warning {
-    border-color: rgba(245, 158, 11, 0.5);
-    background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
-  }
-
-  :global(.dark) .bds-visualizer-feedback-btn.warning:hover {
-    background: rgba(245, 158, 11, 0.25);
-    border-color: #fbbf24;
-  }
-
-  :global(.dark) .bds-visualizer-feedback-btn.error {
-    border-color: rgba(239, 68, 68, 0.5);
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
-  }
-
-  :global(.dark) .bds-visualizer-feedback-btn.error:hover {
-    background: rgba(239, 68, 68, 0.25);
-    border-color: #f87171;
-  }
-
-  :global(.dark) .bds-visualizer-menu {
-    background: #18181b;
-    border-color: #27272a;
-    color: #f4f4f5;
-  }
-
-  :global(.dark) .bds-menu-option-card {
-    background: #202023;
-    border-color: #27272a;
-  }
-
-  :global(.dark) .bds-menu-option-card:hover {
-    background: #27272a;
-  }
-
-  :global(.dark) .bds-menu-option-card.active {
-    border-color: #f59e0b;
-    background: rgba(245, 158, 11, 0.12);
-  }
-
-  :global(.dark) .bds-menu-textarea {
-    background: #121214;
-    border-color: #27272a;
-    color: #f4f4f5;
-  }
-
-  :global(.dark) .bds-menu-cancel {
-    border-color: #3f3f46;
-    color: #a1a1aa;
-  }
-
-  :global(.dark) .bds-menu-cancel:hover {
-    background: #27272a;
-    color: #f4f4f5;
+  }:global(body[data-ds-dark-theme]) .bds-visualizer-feedback-btn.warning,
+  :global(body.dark) .bds-visualizer-feedback-btn.warning,
+  :global(html.dark) .bds-visualizer-feedback-btn.warning {
+    border-color: var(--bds-warning-soft);
+    background: var(--bds-warning-soft);
+    color: var(--bds-warning);
+  }:global(body[data-ds-dark-theme]) .bds-visualizer-feedback-btn.warning:hover,
+  :global(body.dark) .bds-visualizer-feedback-btn.warning:hover,
+  :global(html.dark) .bds-visualizer-feedback-btn.warning:hover {
+    background: var(--bds-warning-soft);
+    border-color: var(--bds-warning);
+  }:global(body[data-ds-dark-theme]) .bds-visualizer-feedback-btn.error,
+  :global(body.dark) .bds-visualizer-feedback-btn.error,
+  :global(html.dark) .bds-visualizer-feedback-btn.error {
+    border-color: var(--bds-danger-soft);
+    background: var(--bds-danger-soft);
+    color: var(--bds-danger);
+  }:global(body[data-ds-dark-theme]) .bds-visualizer-feedback-btn.error:hover,
+  :global(body.dark) .bds-visualizer-feedback-btn.error:hover,
+  :global(html.dark) .bds-visualizer-feedback-btn.error:hover {
+    background: var(--bds-danger-soft);
+    border-color: var(--bds-danger);
+  }:global(body[data-ds-dark-theme]) .bds-visualizer-menu,
+  :global(body.dark) .bds-visualizer-menu,
+  :global(html.dark) .bds-visualizer-menu {
+    background: var(--bds-text-primary);
+    border-color: var(--bds-surface-raised);
+    color: var(--bds-surface-subtle);
+  }:global(body[data-ds-dark-theme]) .bds-menu-option-card,
+  :global(body.dark) .bds-menu-option-card,
+  :global(html.dark) .bds-menu-option-card {
+    background: var(--bds-surface-raised);
+    border-color: var(--bds-surface-raised);
+  }:global(body[data-ds-dark-theme]) .bds-menu-option-card:hover,
+  :global(body.dark) .bds-menu-option-card:hover,
+  :global(html.dark) .bds-menu-option-card:hover {
+    background: var(--bds-surface-raised);
+  }:global(body[data-ds-dark-theme]) .bds-menu-option-card.active,
+  :global(body.dark) .bds-menu-option-card.active,
+  :global(html.dark) .bds-menu-option-card.active {
+    border-color: var(--bds-warning);
+    background: var(--bds-warning-soft);
+  }:global(body[data-ds-dark-theme]) .bds-menu-textarea,
+  :global(body.dark) .bds-menu-textarea,
+  :global(html.dark) .bds-menu-textarea {
+    background: var(--bds-bg);
+    border-color: var(--bds-surface-raised);
+    color: var(--bds-surface-subtle);
+  }:global(body[data-ds-dark-theme]) .bds-menu-cancel,
+  :global(body.dark) .bds-menu-cancel,
+  :global(html.dark) .bds-menu-cancel {
+    border-color: var(--bds-border-strong);
+    color: var(--bds-text-tertiary);
+  }:global(body[data-ds-dark-theme]) .bds-menu-cancel:hover,
+  :global(body.dark) .bds-menu-cancel:hover,
+  :global(html.dark) .bds-menu-cancel:hover {
+    background: var(--bds-surface-raised);
+    color: var(--bds-surface-subtle);
   }
 </style>

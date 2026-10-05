@@ -201,8 +201,7 @@
           </div>
           <button
             type="button"
-            class="bds-btn-outlined"
-            style="font-size:11px;padding:3px 7px;"
+            class="bds-btn-outlined bds-btn-xs"
             onclick={() => (showCmdManager = !showCmdManager)}
           >
             {showCmdManager ? t("commands.done") : t("commands.manage")}

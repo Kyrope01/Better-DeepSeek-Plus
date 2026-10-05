@@ -157,7 +157,7 @@
   .bds-add-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--dsw-alias-bg-mask-1, rgba(0, 0, 0, 0.5));
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     display: flex;
@@ -224,8 +224,8 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #10b981;
-    box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+    background: var(--bds-success);
+    box-shadow: 0 0 6px var(--bds-success-soft);
     flex-shrink: 0;
   }
 

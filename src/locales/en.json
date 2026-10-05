@@ -213,7 +213,11 @@
       "advancedSearchPlaceholder": "Search settings...",
       "advancedNoResults": "No matching settings found.",
       "disableTipBox": "Disable Tip Box",
-      "disableTipBoxHint": "Shows a random tip each time you open the drawer."
+      "disableTipBoxHint": "Shows a random tip each time you open the drawer.",
+      "nativeHint": "Every Better DeepSeek setting is on this page. The same settings also live in the sidebar (the BDS button) for quick access.",
+      "openInSidebar": "Open in sidebar",
+      "deepFetchDepth": "Web search fetch depth",
+      "deepFetchDepthHint": "How many levels of links Deep Research follows while reading a page (0–5)."
     },
     "skillList": {
       "title": "Skill Set",

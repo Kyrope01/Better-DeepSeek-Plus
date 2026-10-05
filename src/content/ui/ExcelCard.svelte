@@ -179,11 +179,11 @@
     border-radius: var(--bds-radius);
     background: var(--bds-bg-panel);
     overflow: hidden;
-  }
-
-  :global(.dark) .bds-excel-card {
+  }:global(body[data-ds-dark-theme]) .bds-excel-card,
+  :global(body.dark) .bds-excel-card,
+  :global(html.dark) .bds-excel-card {
     --excel-icon-bg: #064e3b;
-    --excel-icon-color: #34d399;
+    --excel-icon-color: var(--bds-success);
   }
 
   .bds-excel-download-wrapper {
@@ -252,11 +252,11 @@
 
   .bds-excel-script-toggle {
     padding: 0 16px 12px;
-    border-top: 1px solid var(--ds-border-1, #f0f0f0);
+    border-top: 1px solid var(--ds-border-1, var(--bds-surface-subtle));
     padding-top: 10px;
-  }
-
-  :global(.dark) .bds-excel-script-toggle {
+  }:global(body[data-ds-dark-theme]) .bds-excel-script-toggle,
+  :global(body.dark) .bds-excel-script-toggle,
+  :global(html.dark) .bds-excel-script-toggle {
     border-top-color: var(--bds-border);
   }
 

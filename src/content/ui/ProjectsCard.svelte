@@ -17,8 +17,7 @@
     </div>
     <button
       type="button"
-      class="bds-btn-outlined"
-      style="font-size: 11px; padding: 3px 8px;"
+      class="bds-btn-outlined bds-btn-xs"
       onclick={onmanage}
     >
       {t('projectsCard.manage')}

@@ -324,9 +324,9 @@
     letter-spacing: 0.04em;
   }
   .bds-cdbadge--instant { background: #1a3a2e; color: #4ade80; }
-  .bds-cdbadge--expert { background: #3a1a2e; color: #f87171; }
+  .bds-cdbadge--expert { background: #3a1a2e; color: var(--bds-danger); }
   .bds-cdbadge--deepthink { background: #2a1a4e; color: #a78bfa; }
-  .bds-cdbadge--unknown { background: #2a2a2a; color: #9ca3af; }
+  .bds-cdbadge--unknown { background: #2a2a2a; color: var(--bds-text-tertiary); }
 
   .bds-cdpanel-tabs {
     display: flex;
@@ -429,7 +429,7 @@
   .bds-cdtoggle input:checked + .bds-cdslider { background: var(--bds-accent); }
   .bds-cdtoggle input:checked + .bds-cdslider::before {
     transform: translateX(14px);
-    background: #fff;
+    background: var(--bds-surface);
   }
 
   .bds-cdpre {
@@ -467,7 +467,7 @@
   }
   .bds-cdbtn:disabled { opacity: 0.35; cursor: not-allowed; }
   .bds-cdbtn:hover:not(:disabled) { opacity: 0.85; }
-  .bds-cdbtn--apply { background: var(--bds-accent); color: #fff; }
-  .bds-cdbtn--reset { background: var(--bds-danger); color: #fff; }
+  .bds-cdbtn--apply { background: var(--bds-accent); color: var(--bds-surface); }
+  .bds-cdbtn--reset { background: var(--bds-danger); color: var(--bds-surface); }
   .bds-cdbtn--refresh { background: var(--bds-bg-elevated); color: var(--bds-text-secondary); border: 1px solid var(--bds-border); }
 </style>

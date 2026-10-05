@@ -170,17 +170,17 @@
 <style>
   .bds-pptx-card {
     --pptx-icon-bg: #fff1f2;
-    --pptx-icon-color: #e11d48;
+    --pptx-icon-color: var(--bds-danger);
     margin: 10px 0;
     border: 1px solid var(--bds-border);
     border-radius: var(--bds-radius);
     background: var(--bds-bg-panel);
     overflow: hidden;
-  }
-
-  :global(.dark) .bds-pptx-card {
+  }:global(body[data-ds-dark-theme]) .bds-pptx-card,
+  :global(body.dark) .bds-pptx-card,
+  :global(html.dark) .bds-pptx-card {
     --pptx-icon-bg: #4c0519;
-    --pptx-icon-color: #fb7185;
+    --pptx-icon-color: var(--bds-danger);
   }
 
   .bds-pptx-download-wrapper {
@@ -249,11 +249,11 @@
 
   .bds-pptx-script-toggle {
     padding: 0 16px 12px;
-    border-top: 1px solid var(--ds-border-1, #f0f0f0);
+    border-top: 1px solid var(--ds-border-1, var(--bds-surface-subtle));
     padding-top: 10px;
-  }
-
-  :global(.dark) .bds-pptx-script-toggle {
+  }:global(body[data-ds-dark-theme]) .bds-pptx-script-toggle,
+  :global(body.dark) .bds-pptx-script-toggle,
+  :global(html.dark) .bds-pptx-script-toggle {
     border-top-color: var(--bds-border);
   }
 

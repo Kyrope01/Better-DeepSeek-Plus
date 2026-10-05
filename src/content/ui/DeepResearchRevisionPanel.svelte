@@ -188,8 +188,8 @@
     position: relative;
     z-index: 99999;
     pointer-events: auto !important;
-    background: var(--bds-bg-panel, #1e1f23);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    background: var(--bds-bg-panel, var(--bds-surface));
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 14px;
     padding: 14px;
     box-sizing: border-box;
@@ -216,7 +216,7 @@
   .bds-dr-revision-title {
     font-size: 15px;
     font-weight: 600;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     line-height: 1.35;
   }
 
@@ -230,7 +230,7 @@
   .bds-dr-revision-close {
     background: none;
     border: none;
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
     font-size: 20px;
     line-height: 1;
     cursor: pointer;
@@ -238,7 +238,7 @@
   }
 
   .bds-dr-revision-close:hover {
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
   }
 
   .bds-dr-revision-input {
@@ -246,32 +246,32 @@
     min-height: 86px;
     padding: 10px;
     border-radius: 10px;
-    border: 1px solid var(--bds-border, #3a3b3f);
+    border: 1px solid var(--bds-border, var(--bds-border));
     font-size: 14px;
     resize: vertical;
-    color: var(--bds-text-primary, #ececec);
-    background: var(--bds-bg-elevated, #2a2b30);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
     box-sizing: border-box;
     font-family: inherit;
     outline: none;
   }
 
   .bds-dr-revision-input:focus {
-    border-color: var(--bds-accent, #5b7bff);
+    border-color: var(--bds-accent, var(--bds-accent));
   }
 
   .bds-dr-revision-actions {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
-    border-top: 1px solid var(--bds-border, #3a3b3f);
+    border-top: 1px solid var(--bds-border, var(--bds-border));
     padding-top: 12px;
   }
 
   .bds-dr-revision-btn {
     background: var(--bds-bg-hover, rgba(255, 255, 255, 0.08));
-    color: var(--bds-text-primary, #ececec);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
+    border: 1px solid var(--bds-border, var(--bds-border));
     padding: 6px 14px;
     border-radius: 8px;
     font-size: 13px;
@@ -284,8 +284,8 @@
   }
 
   .bds-dr-revision-submit {
-    background: var(--bds-accent, #5b7bff);
-    color: #fff;
-    border-color: var(--bds-accent, #5b7bff);
+    background: var(--bds-accent, var(--bds-accent));
+    color: var(--bds-surface);
+    border-color: var(--bds-accent, var(--bds-accent));
   }
 </style>

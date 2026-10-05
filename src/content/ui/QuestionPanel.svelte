@@ -592,8 +592,8 @@
     position: relative;
     z-index: 99999;
     pointer-events: auto !important;
-    background: var(--bds-bg-panel, #1e1f23);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    background: var(--bds-bg-panel, var(--bds-surface));
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 14px;
     padding: 16px;
     box-sizing: border-box;
@@ -616,7 +616,7 @@
     margin: 0;
     font-size: 15px;
     font-weight: 600;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     line-height: 1.4;
   }
 
@@ -631,13 +631,13 @@
     align-items: center;
     gap: 8px;
     font-size: 12px;
-    color: var(--bds-text-secondary, #8e8ea0);
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
   }
 
   .bds-nav-btn {
     background: var(--bds-bg-hover, rgba(255, 255, 255, 0.08));
     border: none;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -660,7 +660,7 @@
   .bds-close-btn {
     background: none;
     border: none;
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
     font-size: 20px;
     cursor: pointer;
     padding: 0 4px;
@@ -668,7 +668,7 @@
   }
 
   .bds-close-btn:hover {
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
   }
 
   .bds-question-body {
@@ -679,8 +679,8 @@
   .bds-options-list {
     display: flex;
     flex-direction: column;
-    background: var(--bds-bg-elevated, #2a2b30);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: var(--bds-radius, 14px);
     overflow-y: auto;
     max-height: 380px;
@@ -693,8 +693,8 @@
     padding: 14px 16px;
     background: transparent;
     border: none;
-    border-bottom: 1px solid var(--bds-border, #3a3b3f);
-    color: var(--bds-text-primary, #ececec);
+    border-bottom: 1px solid var(--bds-border, var(--bds-border));
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     font-size: 14px;
     text-align: left;
     cursor: pointer;
@@ -714,12 +714,12 @@
 
   .bds-option-item.selected {
     background: var(--bds-bg-hover, rgba(255, 255, 255, 0.08));
-    color: var(--bds-accent, #5b7bff);
+    color: var(--bds-accent, var(--bds-accent));
   }
 
   .bds-option-index {
     background: var(--bds-bg-hover, rgba(255, 255, 255, 0.08));
-    color: var(--bds-text-secondary, #8e8ea0);
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -732,8 +732,8 @@
   }
 
   .bds-option-item.selected .bds-option-index {
-    background: var(--bds-accent, #5b7bff);
-    color: #fff;
+    background: var(--bds-accent, var(--bds-accent));
+    color: var(--bds-surface);
   }
 
   .bds-option-text {
@@ -742,20 +742,20 @@
   }
 
   .bds-option-arrow {
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
     font-size: 14px;
     transition: transform 0.2s;
   }
 
   .bds-option-item:hover .bds-option-arrow {
     transform: translateX(2px);
-    color: var(--bds-accent, #5b7bff);
+    color: var(--bds-accent, var(--bds-accent));
   }
 
   .bds-option-checkbox-mark {
     width: 18px;
     height: 18px;
-    border: 2px solid var(--bds-border, #3a3b3f);
+    border: 2px solid var(--bds-border, var(--bds-border));
     border-radius: 4px;
     display: flex;
     align-items: center;
@@ -764,13 +764,13 @@
   }
 
   .bds-option-checkbox-mark.checked {
-    background: var(--bds-accent, #5b7bff);
-    border-color: var(--bds-accent, #5b7bff);
+    background: var(--bds-accent, var(--bds-accent));
+    border-color: var(--bds-accent, var(--bds-accent));
   }
 
   .bds-option-checkbox-mark.checked::after {
     content: '✓';
-    color: #fff;
+    color: var(--bds-surface);
     font-size: 12px;
   }
 
@@ -782,7 +782,7 @@
   .bds-custom-text-input {
     background: transparent;
     border: none;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     font-size: 14px;
     flex-grow: 1;
     width: 100%;
@@ -793,8 +793,8 @@
   }
 
   .bds-custom-confirm {
-    background: var(--bds-accent, #5b7bff);
-    color: #fff;
+    background: var(--bds-accent, var(--bds-accent));
+    color: var(--bds-surface);
     border: none;
     width: 24px;
     height: 24px;
@@ -808,8 +808,8 @@
 
   /* Free text box */
   .bds-free-input-wrapper {
-    background: var(--bds-bg-elevated, #2a2b30);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: var(--bds-radius, 14px);
     padding: 12px;
     cursor: text;
@@ -818,7 +818,7 @@
   .bds-text-input {
     background: transparent;
     border: none;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     font-size: 14px;
     width: 100%;
     min-width: 0;
@@ -831,7 +831,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top: 1px solid var(--bds-border, #3a3b3f);
+    border-top: 1px solid var(--bds-border, var(--bds-border));
     padding-top: 12px;
   }
 
@@ -845,7 +845,7 @@
     display: flex;
     gap: 12px;
     font-size: 11px;
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
   }
 
   .bds-footer-actions {
@@ -855,8 +855,8 @@
 
   .bds-action-btn {
     background: var(--bds-bg-hover, rgba(255, 255, 255, 0.08));
-    color: var(--bds-text-primary, #ececec);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
+    border: 1px solid var(--bds-border, var(--bds-border));
     padding: 6px 16px;
     border-radius: 8px;
     font-size: 13px;
@@ -872,9 +872,9 @@
 
   .bds-action-btn.bds-submit-btn,
   .bds-action-btn.bds-next-btn {
-    background: var(--bds-accent, #5b7bff);
-    color: #fff;
-    border-color: var(--bds-accent, #5b7bff);
+    background: var(--bds-accent, var(--bds-accent));
+    color: var(--bds-surface);
+    border-color: var(--bds-accent, var(--bds-accent));
   }
 
   .bds-action-btn.bds-submit-btn:hover,

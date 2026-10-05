@@ -174,12 +174,22 @@
         drawerOpen = false;
       }
     } else {
+      // Re-read the settings form so values changed elsewhere (e.g. the panel
+      // inside DeepSeek's own Settings dialog) are on screen before editing.
+      if (drawerRef && typeof drawerRef.refreshSettings === "function") {
+        drawerRef.refreshSettings();
+      }
       drawerOpen = true;
     }
   }
 
   function closeDrawer() {
     drawerOpen = false;
+  }
+
+  /** Open the drawer (used by the native settings panel and the account menu item). */
+  export function openDrawer() {
+    drawerOpen = true;
   }
 
   function openApiPlayground() {
@@ -213,9 +223,31 @@
   window.addEventListener("bds:open-live-mode", () => {
     openLiveMode();
   });
+
+  // The panel inside DeepSeek's own Settings dialog can ask for the page's
+  // API playground (a page-level surface, not a drawer section).
+  window.addEventListener("bds:open-api-playground", () => {
+    apiPlaygroundOpen = true;
+  });
+
+  // Settings surfaced inside DeepSeek's own dialog ask for the full-featured
+  // sidebar panel through this event (the drawer's markup stays untouched).
+  window.addEventListener("bds:open-settings", () => {
+    drawerOpen = true;
+    queueMicrotask(() => {
+      const ref = drawerRef;
+      if (ref && typeof ref.refreshSettings === "function") ref.refreshSettings();
+    });
+  });
 </script>
 
-<button id="bds-toggle" type="button" onclick={toggleDrawer} aria-label="Better DeepSeek">
+<button
+  id="bds-toggle"
+  type="button"
+  onclick={toggleDrawer}
+  aria-label="Better DeepSeek"
+  title="Better DeepSeek — open settings"
+>
   <span class="bds-toggle-full" aria-hidden="true">BDS</span>
   <span class="bds-toggle-short" aria-hidden="true">B</span>
 </button>

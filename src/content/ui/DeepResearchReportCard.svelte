@@ -62,8 +62,8 @@
   <title>Deep Research Report${runId ? ` (${runId.slice(0, 8)})` : ""}</title>
   <style>
     :root {
-      --bg: #ffffff; --text: #111827; --text-muted: #6b7280;
-      --border: #e5e7eb; --code-bg: #f3f4f6; --primary: #4f8cff;
+      --bg: var(--bds-surface); --text: var(--bds-text-primary); --text-muted: var(--bds-text-secondary);
+      --border: var(--bds-border); --code-bg: var(--bds-surface-subtle); --primary: var(--bds-accent);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {

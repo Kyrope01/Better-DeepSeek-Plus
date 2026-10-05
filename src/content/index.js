@@ -15,7 +15,11 @@
  */
 
 import "bds-platform-globals";
+// Stylesheet order matters: tokens → structural layout → native control kit.
+// All three are bundled into the single content.css asset (cssCodeSplit: false).
+import "../styles/bds-theme.css";
 import "../styles/content.css";
+import "../styles/bds-components.css";
 
 import state from "./state.js";
 import { setDevLogging } from "../lib/dev-log.js";
@@ -25,6 +29,7 @@ import { mountUi } from "./ui/mount.js";
 import { observeChatDom, scheduleScan, startUrlWatcher } from "./scanner.js";
 import { initSidebarMenuInjector } from "./ui/SidebarMenuInjector.js";
 import { initSidebarSearch } from "./ui/SidebarSearch.js";
+import { initNativeSettings } from "./ui/native-settings.js";
 import { checkPendingExport } from "./tools/pending-export.js";
 import { checkPendingContextPrompt } from "./tools/pending-context-prompt.js";
 import { initPricing } from "../lib/pricing.js";
@@ -77,6 +82,8 @@ async function init() {
   observeChatDom();
   initSidebarMenuInjector();
   initSidebarSearch();
+  // Surface the extension's settings inside DeepSeek's own Settings dialog.
+  initNativeSettings();
   scheduleScan();
   checkPendingExport();
   checkPendingMemoryImport();

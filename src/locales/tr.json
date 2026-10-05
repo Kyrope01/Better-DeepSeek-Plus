@@ -213,7 +213,11 @@
       "advancedSearchPlaceholder": "Ayarlarda ara...",
       "advancedNoResults": "Eşleşen ayar bulunamadı.",
       "disableTipBox": "İpucu Kutusunu Devre Dışı Bırak",
-      "disableTipBoxHint": "Drawer her açıldığında rastgele bir ipucu gösterir."
+      "disableTipBoxHint": "Drawer her açıldığında rastgele bir ipucu gösterir.",
+      "nativeHint": "Tüm Better DeepSeek ayarları bu sayfada. Aynı ayarlar kenar çubuğunda (BDS düğmesi) da bulunur.",
+      "openInSidebar": "Kenar çubuğunda aç",
+      "deepFetchDepth": "Web arama getirme derinliği",
+      "deepFetchDepthHint": "Deep Research bir sayfayı okurken kaç bağlantı seviyesi takip eder (0–5)."
     },
     "skillList": {
       "title": "Yetenek Seti",

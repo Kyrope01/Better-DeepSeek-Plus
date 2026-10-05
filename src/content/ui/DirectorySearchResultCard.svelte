@@ -163,9 +163,9 @@
     width: 100%;
     max-width: 100%;
     min-width: 0;
-    border: 1px solid var(--bds-border, #3a3b3f);
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 12px;
-    background: var(--bds-bg-panel, #1e1f23);
+    background: var(--bds-bg-panel, var(--bds-surface));
     overflow: hidden;
     font-family: inherit;
     transition: border-color 0.2s ease;
@@ -176,7 +176,7 @@
   }
 
   .bds-dir-search-error {
-    border-left: 3px solid #ef4444;
+    border-left: 3px solid var(--bds-danger);
   }
 
   .bds-dir-search-header {
@@ -200,17 +200,17 @@
     justify-content: center;
     width: 36px;
     height: 36px;
-    background: rgba(168, 85, 247, 0.1);
-    border: 1px solid rgba(168, 85, 247, 0.25);
+    background: var(--bds-accent-soft);
+    border: 1px solid var(--bds-accent);
     border-radius: 8px;
-    color: #a855f7;
+    color: var(--bds-accent);
     flex-shrink: 0;
   }
 
   .bds-dir-search-icon-error {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.25);
-    color: #ef4444;
+    background: var(--bds-danger-soft);
+    border-color: var(--bds-danger-soft);
+    color: var(--bds-danger);
   }
 
   .bds-dir-search-details {
@@ -222,7 +222,7 @@
     margin: 0;
     font-size: 13.5px;
     font-weight: 600;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -232,22 +232,22 @@
   .bds-dir-search-subtitle {
     margin: 2px 0 0;
     font-size: 11px;
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .bds-dir-search-error-msg {
-    color: #ef4444;
+    color: var(--bds-danger);
   }
 
   .bds-dir-search-entries {
-    border-top: 1px solid var(--bds-border, #3a3b3f);
+    border-top: 1px solid var(--bds-border, var(--bds-border));
   }
 
   .bds-dir-entry {
-    border-bottom: 1px solid var(--bds-border, #3a3b3f);
+    border-bottom: 1px solid var(--bds-border, var(--bds-border));
     transition: background 0.15s ease;
   }
 
@@ -265,7 +265,7 @@
     background: transparent;
     border: none;
     text-align: left;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     font-size: 12px;
     box-sizing: border-box;
     transition: background 0.15s ease;
@@ -300,24 +300,24 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
   }
 
   .bds-dir-expand-btn:hover {
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
   }
 
   .bds-dir-entry-index {
     font-size: 11px;
     font-weight: 600;
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
     flex-shrink: 0;
   }
 
   .bds-dir-entry-file {
     font-weight: 500;
     font-size: 12.5px;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -325,9 +325,9 @@
 
   .bds-dir-line-badge {
     font-size: 10px;
-    background: var(--bds-bg-elevated, #2a2b30);
-    color: var(--bds-text-secondary, #8e8ea0);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
+    border: 1px solid var(--bds-border, var(--bds-border));
     padding: 1px 5px;
     border-radius: 4px;
     font-family: monospace;
@@ -337,9 +337,9 @@
   .bds-dir-query-badge {
     font-size: 10px;
     font-weight: 500;
-    background: rgba(168, 85, 247, 0.12);
-    color: #c084fc;
-    border: 1px solid rgba(168, 85, 247, 0.25);
+    background: var(--bds-accent-soft);
+    color: var(--bds-accent);
+    border: 1px solid var(--bds-accent);
     padding: 1px 5px;
     border-radius: 4px;
     white-space: nowrap;
@@ -348,9 +348,9 @@
 
   .bds-dir-score-badge {
     font-size: 10px;
-    background: rgba(168, 85, 247, 0.1);
-    color: #a855f7;
-    border: 1px solid rgba(168, 85, 247, 0.2);
+    background: var(--bds-accent-soft);
+    color: var(--bds-accent);
+    border: 1px solid var(--bds-accent);
     padding: 1px 5px;
     border-radius: 4px;
     flex-shrink: 0;
@@ -367,10 +367,10 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: var(--bds-bg-elevated, #2a2b30);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 4px;
-    color: var(--bds-text-secondary, #8e8ea0);
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
     font-size: 10.5px;
     font-weight: 500;
     padding: 3px 6px;
@@ -380,12 +380,12 @@
 
   .bds-dir-copy-btn:hover {
     background: var(--bds-bg-hover, rgba(255, 255, 255, 0.08));
-    color: var(--bds-text-primary, #ececec);
-    border-color: var(--bds-accent, #4d6bfe);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
+    border-color: var(--bds-accent, var(--bds-accent));
   }
 
   .bds-dir-expand-chevron {
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
     font-size: 11px;
     width: 12px;
     text-align: center;
@@ -401,14 +401,14 @@
     max-height: 240px;
     overflow-y: auto;
     overflow-x: auto;
-    background: var(--bds-bg-elevated, #2a2b30);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 6px;
     padding: 10px 12px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 11.5px;
     line-height: 1.5;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     white-space: pre;
     tab-size: 2;
   }
@@ -426,7 +426,7 @@
     padding: 14px;
     text-align: center;
     font-size: 12px;
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
   }
   .bds-dir-search-empty p {
     margin: 0;

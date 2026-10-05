@@ -19,6 +19,7 @@ import state from "../state.js";
  * @property {(title: string, content: string) => void} showPreviewPanel
  * @property {() => void} hidePreviewPanel
  * @property {(visible: boolean) => void} showLongWorkOverlay
+ * @property {() => void} openDrawer
  */
 
 /**
@@ -60,6 +61,7 @@ export function mountUi() {
     showLongWorkOverlay: (visible) => app.showLongWorkOverlay(visible),
     openLiveMode: () => app.openLiveMode(),
     closeLiveMode: () => app.closeLiveMode(),
+    openDrawer: () => app.openDrawer(),
   };
 
   state.ui = api;

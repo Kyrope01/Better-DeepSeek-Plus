@@ -9,20 +9,18 @@
  *
  * Additionally fires AndroidBridge.reportTheme() when available so the native layer can update
  * status/navigation bar icon colours without waiting for the next cold start.
+ *
+ * Detection is shared with every other light/dark consumer through
+ * isPageDark() in src/lib/page-theme.js.
  */
 
 import { STORAGE_KEYS } from "../lib/constants.js";
+import { isPageDark, PAGE_THEME_ATTRIBUTES } from "../lib/page-theme.js";
 
 export function startThemeWatcher() {
-  // DeepSeek sets the theme class on <body> (e.g. "en_US dark" / "en_US light"), not on <html>.
-  // Explicit body class always wins; matchMedia is a last-resort fallback for the "System"
-  // setting or when no class is present yet.
-  function detect() {
-    if (document.body.classList.contains("dark")) return true;
-    if (document.body.classList.contains("light")) return false;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  function run() {
+    apply(isPageDark());
   }
-
   function apply(isDark) {
     chrome.storage.local.set({ [STORAGE_KEYS.pageIsDark]: isDark });
     // Live notification for Android native bar icon colours. No-op on other platforms.
@@ -33,22 +31,18 @@ export function startThemeWatcher() {
     } catch (_) {}
   }
 
-  function run() {
-    apply(detect());
-  }
-
   run();
 
-  // Primary observer: watch <body> class for DeepSeek's live theme toggles.
+  // Primary observer: <body> class *and* attributes (data-ds-dark-theme appears/disappears live).
   new MutationObserver(run).observe(document.body, {
     attributes: true,
-    attributeFilter: ["class"],
+    attributeFilter: PAGE_THEME_ATTRIBUTES,
   });
 
   // Fallback observer: <html> attributes (data-theme or class) for other potential signals.
   new MutationObserver(run).observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ["class", "data-theme"],
+    attributeFilter: PAGE_THEME_ATTRIBUTES,
   });
 
   // OS-level theme changes (covers DeepSeek's "System" setting).

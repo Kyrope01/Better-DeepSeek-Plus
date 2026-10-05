@@ -129,10 +129,10 @@
 <style>
   .bds-deep-research-status-card {
     margin: 8px 0;
-    border: 1px solid var(--bds-border, #3a3b3f);
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 12px;
-    background: var(--bds-bg-panel, #1e1f23);
-    color: var(--bds-text-primary, #ececec);
+    background: var(--bds-bg-panel, var(--bds-surface));
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
@@ -149,9 +149,9 @@
     width: 34px;
     height: 34px;
     border-radius: 8px;
-    color: var(--bds-accent, #4f8cff);
-    background: var(--bds-bg-elevated, #25262b);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    color: var(--bds-accent, var(--bds-accent));
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
+    border: 1px solid var(--bds-border, var(--bds-border));
     font-size: 10px;
     font-weight: 700;
     flex-shrink: 0;
@@ -164,18 +164,18 @@
   }
   .bds-drs-progress {
     padding: 10px 14px 0;
-    border-top: 1px solid var(--bds-border, #3a3b3f);
+    border-top: 1px solid var(--bds-border, var(--bds-border));
   }
   .bds-drs-bar-bg {
     height: 8px;
-    background: var(--bds-bg-elevated, #25262b);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
     border-radius: 4px;
     overflow: hidden;
     margin-bottom: 4px;
   }
   .bds-drs-bar-fill {
     height: 100%;
-    background: var(--bds-accent, #4f8cff);
+    background: var(--bds-accent, var(--bds-accent));
     border-radius: 4px;
     transition: width 0.3s ease;
   }
@@ -191,11 +191,11 @@
     border-radius: 4px;
     text-transform: uppercase;
     font-weight: 600;
-    background: var(--bds-bg-elevated, #25262b);
-    border: 1px solid var(--bds-border, #3a3b3f);
-    color: var(--bds-accent, #4f8cff);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
+    border: 1px solid var(--bds-border, var(--bds-border));
+    color: var(--bds-accent, var(--bds-accent));
   }
-  .bds-drs-phase--preparing-report { color: #22c55e; }
+  .bds-drs-phase--preparing-report { color: var(--bds-success); }
   .bds-drs-current {
     padding: 6px 14px 12px;
     font-size: 12px;
@@ -203,10 +203,10 @@
   }
   .bds-drs-raw {
     margin: 0;
-    border-top: 1px solid var(--bds-border, #3a3b3f);
+    border-top: 1px solid var(--bds-border, var(--bds-border));
     font-size: 11px;
     overflow-x: auto;
-    background: var(--bds-bg-elevated, #25262b);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
     padding: 10px 14px;
   }
 
@@ -221,13 +221,13 @@
     border-top: 1px solid var(--bds-border, rgba(255, 255, 255, 0.05));
   }
   .bds-drs-step-row.active {
-    background: var(--bds-bg-elevated, #25262b);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
   }
   .bds-drs-step-row.complete {
     opacity: 0.6;
   }
   .bds-drs-step-row.error {
-    color: #ef4444;
+    color: var(--bds-danger);
   }
   .bds-drs-step-num {
     font-size: 11px;
@@ -251,8 +251,8 @@
     background: var(--bds-bg-elevated, rgba(255, 255, 255, 0.06));
     border: 1px solid var(--bds-border, rgba(255, 255, 255, 0.08));
   }
-  .bds-drs-step-action.action--search { color: var(--bds-accent, #4f8cff); }
-  .bds-drs-step-action.action--fetch { color: #22c55e; }
+  .bds-drs-step-action.action--search { color: var(--bds-accent, var(--bds-accent)); }
+  .bds-drs-step-action.action--fetch { color: var(--bds-success); }
   .bds-drs-step-query {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -269,8 +269,8 @@
     display: inline-block;
     width: 10px;
     height: 10px;
-    border: 2px solid var(--bds-border, #3a3b3f);
-    border-top-color: var(--bds-accent, #4f8cff);
+    border: 2px solid var(--bds-border, var(--bds-border));
+    border-top-color: var(--bds-accent, var(--bds-accent));
     border-radius: 50%;
     animation: bds-drs-spin 0.6s linear infinite;
   }

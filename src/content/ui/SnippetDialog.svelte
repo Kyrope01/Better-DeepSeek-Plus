@@ -203,17 +203,17 @@
     box-shadow: 0 0 0 3px var(--bds-accent-glow);
   }
   .bds-snippet-cmd-error {
-    color: var(--bds-danger, #f87171);
+    color: var(--bds-danger, var(--bds-danger));
     font-size: 11px;
     white-space: nowrap;
   }
   .bds-snippet-cmd-ok {
-    color: var(--bds-success, #34d399);
+    color: var(--bds-success, var(--bds-success));
     font-size: 11px;
     font-weight: 600;
   }
   .bds-snippet-error {
-    color: var(--bds-danger, #f87171);
+    color: var(--bds-danger, var(--bds-danger));
     font-size: 13px;
     padding: 0 2px;
   }

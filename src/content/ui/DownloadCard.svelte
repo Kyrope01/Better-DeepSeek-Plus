@@ -88,18 +88,18 @@
 <style>
   /* Basic Variables (Light Mode) */
   .bds-download-card {
-    --bg-color: #ffffff;
-    --border-color: #e5e7eb;
-    --icon-bg: #f3f4f6;
-    --icon-color: #6b7280;
-    --title-color: #111827;
-    --desc-color: #6b7280;
-    --btn-border: #d1d5db;
-    --btn-text: #374151;
-    --btn-hover-bg: #f9fafb;
-    --panel-bg: #fafafa;
-    --row-hover-bg: #f3f4f6;
-    --code-color: #1f2937;
+    --bg-color: var(--bds-surface);
+    --border-color: var(--bds-border);
+    --icon-bg: var(--bds-surface-subtle);
+    --icon-color: var(--bds-text-secondary);
+    --title-color: var(--bds-text-primary);
+    --desc-color: var(--bds-text-secondary);
+    --btn-border: var(--bds-border-strong);
+    --btn-text: var(--bds-text-secondary);
+    --btn-hover-bg: var(--bds-surface-subtle);
+    --panel-bg: var(--bds-surface-subtle);
+    --row-hover-bg: var(--bds-surface-subtle);
+    --code-color: var(--bds-text-primary);
 
     margin: 10px 0;
     border: 1px solid var(--border-color);
@@ -110,19 +110,21 @@
   }
 
   /* Dark Mode Settings */
-  :global(.dark) .bds-download-card {
-    --bg-color: #18181b;
-    --border-color: #27272a;
-    --icon-bg: #27272a;
-    --icon-color: #a1a1aa;
-    --title-color: #ffffff;
-    --desc-color: #a1a1aa;
-    --btn-border: #3f3f46;
-    --btn-text: #ffffff;
-    --btn-hover-bg: #27272a;
-    --panel-bg: #131316;
-    --row-hover-bg: #27272a;
-    --code-color: #e5e7eb;
+  :global(body[data-ds-dark-theme]) .bds-download-card,
+  :global(body.dark) .bds-download-card,
+  :global(html.dark) .bds-download-card  {
+    --bg-color: var(--bds-text-primary);
+    --border-color: var(--bds-surface-raised);
+    --icon-bg: var(--bds-surface-raised);
+    --icon-color: var(--bds-text-tertiary);
+    --title-color: var(--bds-surface);
+    --desc-color: var(--bds-text-tertiary);
+    --btn-border: var(--bds-border-strong);
+    --btn-text: var(--bds-surface);
+    --btn-hover-bg: var(--bds-surface-raised);
+    --panel-bg: var(--bds-surface-subtle);
+    --row-hover-bg: var(--bds-surface-raised);
+    --code-color: var(--bds-border);
   }
 
   .bds-download-card-main {
@@ -235,7 +237,7 @@
   }
 
   .bds-download-card-row-dir .bds-download-card-row-icon {
-    color: #f59e0b;
+    color: var(--bds-warning);
   }
 
   .bds-download-card-row-name {

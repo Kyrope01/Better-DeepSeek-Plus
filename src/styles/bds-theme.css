@@ -1,0 +1,522 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   BDS Theme — DeepSeek design tokens
+   ══════════════════════════════════════════════════════════════════════════
+
+   The BDS UI is painted from *DeepSeek's own* design tokens, read live from the
+   page. chat.deepseek.com declares its palette on <body> (dark values on
+   body[data-ds-dark-theme]); #bds-root is a child of <body>, and `all: initial`
+   does not reset custom properties, so every host token is inherited by our UI
+   and follows the site theme (and any user style overrides) automatically.
+
+   Resolution order for every semantic token:
+     1. --dsw-alias-*   the current (2026) DeepSeek Web design platform
+     2. --dsr-*         the app-shell tokens still used by chat surfaces
+     3. --ds-rgb-*      the primitive palette (rgb trios)
+     4. literal         the value DeepSeek ships, kept in sync with the
+                        @deepseek-ai/dsh-client-ui-theme platform sheet
+                        (design-platform.css) and the chat.deepseek.com CSS
+
+   The literals are only fallbacks: a host declaration always wins because it
+   is declared closer to our nodes (on <body>).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Primitive fallbacks (rgb trios, as the site stores them) ─────────────
+   Declared on :root so the host's own body-level definitions win. */
+:root {
+  --ds-rgb-black: 0 0 0;
+  --ds-rgb-white: 255 255 255;
+  --ds-rgb-neutral-00: 255 255 255;
+  --ds-rgb-neutral-50: 250 250 250;
+  --ds-rgb-neutral-100: 245 245 245;
+  --ds-rgb-neutral-150: 237 237 237;
+  --ds-rgb-neutral-200: 229 229 229;
+  --ds-rgb-neutral-250: 220 220 220;
+  --ds-rgb-neutral-300: 212 212 212;
+  --ds-rgb-neutral-350: 187 187 187;
+  --ds-rgb-neutral-400: 163 163 163;
+  --ds-rgb-neutral-450: 139 139 139;
+  --ds-rgb-neutral-500: 115 115 115;
+  --ds-rgb-neutral-550: 101 103 107;
+  --ds-rgb-neutral-600: 82 82 82;
+  --ds-rgb-neutral-650: 73 73 73;
+  --ds-rgb-neutral-700: 64 64 64;
+  --ds-rgb-neutral-750: 51 51 51;
+  --ds-rgb-neutral-800: 38 38 38;
+  --ds-rgb-neutral-850: 30 30 30;
+  --ds-rgb-gray-100: 243 244 246;
+  --ds-rgb-zinc-200: 228 228 231;
+  --ds-rgb-zinc-350: 186 186 193;
+  --ds-rgb-zinc-400: 161 161 170;
+  --ds-rgb-zinc-650: 72 72 80;
+  --ds-rgb-zinc-750: 42 42 50;
+  --ds-rgb-blue-50: 239 246 255;
+  --ds-rgb-blue-100: 219 234 254;
+  --ds-rgb-blue-300: 147 197 253;
+  --ds-rgb-blue-400: 96 165 250;
+  --ds-rgb-blue-500: 59 130 246;
+  --ds-rgb-red-400: 248 113 113;
+  --ds-rgb-red-450: 243 90 90;
+  --ds-rgb-red-500: 239 68 68;
+  --ds-rgb-red-550: 229 53 53;
+  --ds-rgb-green-400: 78 209 126;
+  --ds-rgb-green-500: 34 197 94;
+  --ds-rgb-amber-400: 247 173 49;
+  --ds-rgb-amber-500: 245 158 11;
+  --ds-rgb-amber-600: 221 134 41;
+
+  /* neutral-bluish scale (the current platform's neutral ramp) */
+  --ds-rgb-bluish-00: 255 255 255;
+  --ds-rgb-bluish-50: 249 250 251;
+  --ds-rgb-bluish-60: 245 246 247;
+  --ds-rgb-bluish-75: 241 243 245;
+  --ds-rgb-bluish-100: 235 238 242;
+  --ds-rgb-bluish-150: 233 236 242;
+  --ds-rgb-bluish-200: 225 229 238;
+  --ds-rgb-bluish-300: 207 211 214;
+  --ds-rgb-bluish-400: 173 178 184;
+  --ds-rgb-bluish-500: 151 157 166;
+  --ds-rgb-bluish-600: 129 133 140;
+  --ds-rgb-bluish-700: 97 102 107;
+  --ds-rgb-bluish-750: 67 69 74;
+  --ds-rgb-bluish-800: 53 54 56;
+  --ds-rgb-bluish-850: 44 44 46;
+  --ds-rgb-bluish-875: 35 35 36;
+  --ds-rgb-bluish-900: 27 27 28;
+  --ds-rgb-bluish-950: 21 21 23;
+  --ds-rgb-bluish-1000: 15 17 21;
+  --ds-rgb-deepseek-50: 237 243 254;
+  --ds-rgb-deepseek-100: 228 237 253;
+  --ds-rgb-deepseek-200: 211 226 255;
+  --ds-rgb-deepseek-400: 122 170 255;
+  --ds-rgb-deepseek-450: 86 134 254;
+  --ds-rgb-deepseek-500: 65 118 230;
+  --ds-rgb-deepseek-800: 52 65 91;
+  --ds-rgb-deepseek-900: 40 49 66;
+
+  /* ── Semantic fallbacks: light ───────────────────────────────────────── */
+  --ds-rgb-elevated: var(--ds-rgb-white);
+  --ds-rgb-hover: var(--ds-rgb-neutral-100);
+  --ds-rgb-input: var(--ds-rgb-gray-100);
+  --ds-rgb-input-focus: var(--ds-rgb-white);
+  --ds-rgb-input-strong: var(--ds-rgb-neutral-150);
+  --ds-rgb-label-1: var(--ds-rgb-neutral-700);
+  --ds-rgb-label-2: var(--ds-rgb-neutral-450);
+  --ds-rgb-label-3: var(--ds-rgb-neutral-400);
+  --ds-rgb-primary: var(--ds-rgb-blue-500);
+  --ds-rgb-primary-foreground: var(--ds-rgb-white);
+  --ds-rgb-link: var(--ds-rgb-primary);
+  --ds-rgb-separator: var(--ds-rgb-neutral-100);
+  --ds-rgb-separator-strong: var(--ds-rgb-neutral-200);
+  --ds-rgb-segmented: var(--ds-rgb-neutral-100);
+  --ds-rgb-segmented-button: var(--ds-rgb-white);
+  --ds-rgb-segmented-separator: var(--ds-rgb-neutral-300);
+  --ds-rgb-tag: var(--ds-rgb-neutral-200);
+  --ds-rgb-thumb: var(--ds-rgb-white);
+  --ds-rgb-track: var(--ds-rgb-neutral-200);
+  --ds-rgb-error: var(--ds-rgb-red-500);
+  --ds-rgb-success: var(--ds-rgb-green-500);
+  --ds-rgb-warning: var(--ds-rgb-amber-500);
+  --ds-rgb-info: var(--ds-rgb-blue-500);
+  --ds-rgb-bg-base: var(--ds-rgb-white);
+  --ds-rgba-transparent: 255 255 255/0;
+
+  --dsr-main: #4d6bfe;
+  --dsr-main-2: rgba(77, 107, 254, 0.4);
+  --dsr-main-3: rgba(77, 107, 254, 0.2);
+  --dsr-bg: rgb(var(--ds-rgb-white));
+  --dsr-text-0: rgb(var(--ds-rgb-black));
+  --dsr-text-1: rgb(var(--ds-rgb-neutral-800));
+  --dsr-text-2: rgb(var(--ds-rgb-neutral-600));
+  --dsr-text-3: rgb(var(--ds-rgb-neutral-400));
+  --dsr-text-4: rgb(var(--ds-rgb-zinc-350));
+  --dsr-border-1: rgb(var(--ds-rgb-neutral-350));
+  --dsr-border-2: rgb(var(--ds-rgb-neutral-200));
+  --dsr-input-border: #dce0e9;
+  --dsr-input-bg: rgb(var(--ds-rgb-gray-100));
+  --dsr-button-main-bg: var(--dsr-main);
+  --dsr-button-main-bg-hover: #4166d5;
+  --dsr-button-second-bg: var(--dsr-main-3);
+  --dsr-button-grey-0: rgb(var(--ds-rgb-neutral-150));
+  --dsr-button-grey-1: rgb(var(--ds-rgb-neutral-100));
+  --dsr-button-grey-2: rgb(var(--ds-rgb-neutral-50));
+  --dsr-delete-button-bg: rgb(var(--ds-rgb-red-500) / 0.85);
+  --dsr-tooltip-fg: #eff6ff;
+  --dsr-tooltip-bg: rgb(var(--ds-rgb-neutral-850));
+  --dsr-side-bg: #f9fbff;
+  --dsr-side-hover-bg-rgb: 239, 246, 255;
+  --dsr-side-hover-bg: rgb(var(--ds-rgb-blue-50));
+  --dsr-icon-fg-1: rgb(var(--ds-rgb-neutral-650));
+  --dsr-error-fg: rgb(var(--ds-rgb-red-550));
+
+  /* ── Design-platform primitives (2026, --dsw-*) ─────────────────────── */
+  --dsw-static-neutral-bluish-00: rgb(var(--ds-rgb-bluish-00));
+  --dsw-static-neutral-bluish-50: rgb(var(--ds-rgb-bluish-50));
+  --dsw-static-neutral-bluish-60: rgb(var(--ds-rgb-bluish-60));
+  --dsw-static-neutral-bluish-75: rgb(var(--ds-rgb-bluish-75));
+  --dsw-static-neutral-bluish-100: rgb(var(--ds-rgb-bluish-100));
+  --dsw-static-neutral-bluish-200: rgb(var(--ds-rgb-bluish-200));
+  --dsw-static-neutral-bluish-300: rgb(var(--ds-rgb-bluish-300));
+  --dsw-static-neutral-bluish-400: rgb(var(--ds-rgb-bluish-400));
+  --dsw-static-neutral-bluish-500: rgb(var(--ds-rgb-bluish-500));
+  --dsw-static-neutral-bluish-600: rgb(var(--ds-rgb-bluish-600));
+  --dsw-static-neutral-bluish-700: rgb(var(--ds-rgb-bluish-700));
+  --dsw-static-neutral-bluish-750: rgb(var(--ds-rgb-bluish-750));
+  --dsw-static-neutral-bluish-800: rgb(var(--ds-rgb-bluish-800));
+  --dsw-static-neutral-bluish-850: rgb(var(--ds-rgb-bluish-850));
+  --dsw-static-neutral-bluish-875: rgb(var(--ds-rgb-bluish-875));
+  --dsw-static-neutral-bluish-900: rgb(var(--ds-rgb-bluish-900));
+  --dsw-static-neutral-bluish-950: rgb(var(--ds-rgb-bluish-950));
+  --dsw-static-neutral-bluish-1000: rgb(var(--ds-rgb-bluish-1000));
+  --dsw-static-deepseek-50: rgb(var(--ds-rgb-deepseek-50));
+  --dsw-static-deepseek-100: rgb(var(--ds-rgb-deepseek-100));
+  --dsw-static-deepseek-200: rgb(var(--ds-rgb-deepseek-200));
+  --dsw-static-deepseek-400: rgb(var(--ds-rgb-deepseek-400));
+  --dsw-static-deepseek-450: rgb(var(--ds-rgb-deepseek-450));
+  --dsw-static-deepseek-500: rgb(var(--ds-rgb-deepseek-500));
+  --dsw-static-deepseek-800: rgb(var(--ds-rgb-deepseek-800));
+  --dsw-static-deepseek-900: rgb(var(--ds-rgb-deepseek-900));
+  --dsw-static-red-400: rgb(var(--ds-rgb-red-450));
+  --dsw-static-red-600: rgb(var(--ds-rgb-red-550));
+  --dsw-static-green-500: rgb(var(--ds-rgb-green-500));
+  --dsw-static-amber-400: rgb(var(--ds-rgb-amber-400));
+  --dsw-static-amber-500: rgb(var(--ds-rgb-amber-500));
+  --dsw-static-amber-600: rgb(var(--ds-rgb-amber-600));
+
+  /* Radii + motion: the site's own control recipe. The --dsw-radius-* names are
+     deliberately NOT declared here so that a host definition always wins the
+     fallback chain instead of being shadowed by our copy. */
+  --dsw-focus-ring-width: 2px;
+  --dsw-focus-ring-color: var(--dsw-alias-state-business-primary, #4d6bfe);
+  --dsw-elevation-panel: 0 3px 8px rgba(0, 0, 0, 0.03), 0 0 16px rgba(0, 0, 0, 0.02);
+  --dsw-elevation-prominent: 0 3px 8px rgba(0, 0, 0, 0.04), 0 0 20px rgba(0, 0, 0, 0.05);
+  --dsw-elevation-menu: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Typography + geometry used by every DeepSeek control. */
+  --ds-font-size-l: 16px;
+  --ds-line-height-l: 28px;
+  --ds-font-size-m: 14px;
+  --ds-line-height-m: 25px;
+  --ds-font-size-sp: 13px;
+  --ds-line-height-sp: 23px;
+  --ds-font-size-s: 12px;
+  --ds-line-height-s: 21px;
+  --ds-font-size-xs: 10px;
+  --ds-line-height-xs: 18px;
+  --ds-input-height-l: 44px;
+  --ds-input-height-m: 34px;
+  --ds-input-height-s: 30px;
+  --ds-input-height-xs: 26px;
+  --ds-font-weight-strong: 600;
+  --ds-font-family-code: "SF Mono", "JetBrains Mono", "Fira Code", Consolas,
+    "Liberation Mono", Menlo, Courier, "PingFang SC", "Microsoft YaHei";
+  --ds-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ds-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ds-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ds-transition-duration: 0.2s;
+  --ds-transition-duration-fast: 0.1s;
+  --ds-transition-duration-slow: 0.3s;
+}
+
+/* ── Dark fallbacks ────────────────────────────────────────────────────────
+   Used only when the host has not supplied a token. */
+body[data-ds-dark-theme],
+body.dark,
+html.dark {
+  --ds-rgb-elevated: var(--ds-rgb-neutral-750);
+  --ds-rgb-hover: var(--ds-rgb-neutral-750);
+  --ds-rgb-input: var(--ds-rgb-neutral-800);
+  --ds-rgb-input-focus: var(--ds-rgb-neutral-750);
+  --ds-rgb-input-strong: var(--ds-rgb-neutral-700);
+  --ds-rgb-label-1: var(--ds-rgb-zinc-200);
+  --ds-rgb-label-2: var(--ds-rgb-zinc-350);
+  --ds-rgb-label-3: var(--ds-rgb-zinc-400);
+  --ds-rgb-separator: var(--ds-rgb-neutral-750);
+  --ds-rgb-separator-strong: var(--ds-rgb-neutral-700);
+  --ds-rgb-segmented: var(--ds-rgb-neutral-800);
+  --ds-rgb-segmented-button: var(--ds-rgb-neutral-700);
+  --ds-rgb-segmented-separator: var(--ds-rgb-neutral-700);
+  --ds-rgb-tag: var(--ds-rgb-neutral-750);
+  --ds-rgb-track: var(--ds-rgb-neutral-700);
+  --ds-rgb-bg-base: var(--ds-rgb-neutral-850);
+  --ds-rgb-primary: var(--ds-rgb-blue-500);
+  --ds-rgb-primary-foreground: var(--ds-rgb-white);
+
+  --dsr-bg: #292a2d;
+  --dsr-text-0: rgb(var(--ds-rgb-white));
+  --dsr-text-1: rgb(var(--ds-rgb-zinc-200));
+  --dsr-text-2: rgb(var(--ds-rgb-zinc-350));
+  --dsr-text-3: rgb(var(--ds-rgb-neutral-300));
+  --dsr-text-4: rgb(var(--ds-rgb-zinc-400));
+  --dsr-border-1: rgb(var(--ds-rgb-neutral-450));
+  --dsr-border-2: rgb(var(--ds-rgb-neutral-600));
+  --dsr-input-border: #5a5a69;
+  --dsr-input-bg: #404045;
+  --dsr-button-main-bg: #509fff;
+  --dsr-button-main-bg-hover: #4166d5;
+  --dsr-button-second-bg: var(--dsr-main-2);
+  --dsr-button-grey-0: rgb(var(--ds-rgb-neutral-600));
+  --dsr-button-grey-1: rgb(var(--ds-rgb-neutral-650));
+  --dsr-button-grey-2: rgb(var(--ds-rgb-neutral-700));
+  --dsr-delete-button-bg: rgb(var(--ds-rgb-red-500) / 0.85);
+  --dsr-tooltip-fg: rgb(var(--ds-rgb-zinc-650));
+  --dsr-tooltip-bg: #000;
+  --dsr-side-bg: #212327;
+  --dsr-side-hover-bg-rgb: 51, 51, 51;
+  --dsr-side-hover-bg: rgb(var(--ds-rgb-neutral-750));
+  --dsr-icon-fg-1: rgb(var(--ds-rgb-neutral-350));
+  --dsr-error-fg: rgb(var(--ds-rgb-red-450));
+
+  /* dark platform aliases (exact 2026 platform values) */
+  --dsw-alias-bg-base: rgb(var(--ds-rgb-bluish-950));
+  --dsw-alias-bg-layer-1: rgb(var(--ds-rgb-bluish-875));
+  --dsw-alias-bg-layer-2: rgb(var(--ds-rgb-bluish-850));
+  --dsw-alias-bg-layer-3: rgb(var(--ds-rgb-bluish-800));
+  --dsw-alias-label-primary: rgb(var(--ds-rgb-bluish-50));
+  --dsw-alias-label-secondary: rgb(var(--ds-rgb-bluish-300));
+  --dsw-alias-label-tertiary: rgb(var(--ds-rgb-bluish-400));
+  --dsw-alias-label-caption: rgb(var(--ds-rgb-bluish-600));
+  --dsw-alias-label-dimmed: rgb(var(--ds-rgb-bluish-750));
+  --dsw-alias-label-primary-foreground: rgb(var(--ds-rgb-bluish-1000));
+  --dsw-alias-border-l1: rgba(255, 255, 255, 0.06);
+  --dsw-alias-border-l2: rgba(255, 255, 255, 0.12);
+  --dsw-alias-border-l3: rgba(255, 255, 255, 0.16);
+  --dsw-alias-border-l4: rgba(255, 255, 255, 0.2);
+  --dsw-alias-interactive-bg-hover: rgba(255, 255, 255, 0.08);
+  --dsw-alias-interactive-bg-active: rgba(255, 255, 255, 0.14);
+  --dsw-alias-brand-primary: rgb(var(--ds-rgb-bluish-50));
+  --dsw-alias-brand-text: rgb(var(--ds-rgb-bluish-50));
+  --dsw-alias-button-primary-fill: rgb(var(--ds-rgb-bluish-50));
+  --dsw-alias-button-primary-hover: rgb(var(--ds-rgb-bluish-100));
+  --dsw-alias-button-elevated-fill: rgb(var(--ds-rgb-bluish-750));
+  --dsw-alias-button-contrast-fill: rgb(var(--ds-rgb-bluish-50));
+  --dsw-alias-button-floating-fill: rgb(var(--ds-rgb-bluish-850));
+  --dsw-alias-button-floating-hover: rgb(var(--ds-rgb-bluish-800));
+  --dsw-alias-state-business-primary: rgb(var(--ds-rgb-deepseek-400));
+  --dsw-alias-state-error-primary: rgb(var(--ds-rgb-red-450));
+  --dsw-alias-state-success-primary: rgb(var(--ds-rgb-green-500));
+  --dsw-alias-state-warn-primary: rgb(var(--ds-rgb-amber-500));
+  --dsw-alias-toast-bg: rgb(var(--ds-rgb-bluish-750));
+  --dsw-alias-tooltip-bg: rgb(var(--ds-rgb-bluish-750));
+  --dsw-alias-bg-skeleton: rgba(255, 255, 255, 0.08);
+  --dsw-alias-bg-mask-1: rgba(0, 0, 0, 0.5);
+  --dsw-alias-markdown-inline-code: rgb(var(--ds-rgb-neutral-800));
+  --dsw-alias-markdown-code-block: rgb(var(--ds-rgb-bluish-900));
+  --dsw-alias-scrollbar-bg-l1: rgb(var(--ds-rgb-neutral-700));
+  --dsw-alias-scrollbar-bg-l2: rgb(var(--ds-rgb-neutral-600));
+  --dsw-alias-scrollbar-hover-l1: rgb(var(--ds-rgb-neutral-600));
+  --dsw-alias-scrollbar-hover-l2: rgb(var(--ds-rgb-neutral-550));
+  --dsw-specific-menu: rgba(67, 69, 74, 0.45);
+  --dsw-specific-bubble: rgb(var(--ds-rgb-bluish-850));
+  --dsw-specific-input-major: rgb(var(--ds-rgb-bluish-850));
+  --dsw-specific-selector: rgb(var(--ds-rgb-bluish-800));
+  --dsw-specific-sidebar-fill: rgb(var(--ds-rgb-bluish-900));
+  --dsw-specific-sidebar-nav-item-hover: rgb(var(--ds-rgb-bluish-850));
+  --dsw-specific-sidebar-nav-item-active: rgb(var(--ds-rgb-bluish-750));
+  --dsw-specific-sidebar-nav-item-active-accent: rgb(var(--ds-rgb-bluish-800));
+  --dsw-specific-tip: rgb(var(--ds-rgb-bluish-800));
+  --dsw-alias-switch-thumb: rgb(var(--ds-rgb-bluish-400));
+  --dsw-menu-surface-fill: var(--dsw-specific-menu);
+}
+
+/* ── Light platform fallbacks (only used if the page defines none) ───────── */
+:root,
+body.ds-light {
+  --dsw-alias-bg-base: rgb(var(--ds-rgb-bluish-00));
+  --dsw-alias-bg-layer-1: rgb(var(--ds-rgb-bluish-00));
+  --dsw-alias-bg-layer-2: rgb(var(--ds-rgb-bluish-00));
+  --dsw-alias-bg-layer-3: rgb(var(--ds-rgb-bluish-00));
+  --dsw-alias-label-primary: rgb(var(--ds-rgb-bluish-1000));
+  --dsw-alias-label-secondary: rgb(var(--ds-rgb-bluish-700));
+  --dsw-alias-label-tertiary: rgb(var(--ds-rgb-bluish-600));
+  --dsw-alias-label-caption: rgb(var(--ds-rgb-bluish-400));
+  --dsw-alias-label-dimmed: rgb(var(--ds-rgb-bluish-200));
+  --dsw-alias-label-primary-foreground: rgb(var(--ds-rgb-bluish-00));
+  --dsw-alias-border-l1: rgba(0, 0, 0, 0.04);
+  --dsw-alias-border-l2: rgba(0, 0, 0, 0.1);
+  --dsw-alias-border-l3: rgba(0, 0, 0, 0.12);
+  --dsw-alias-border-l4: rgba(0, 0, 0, 0.16);
+  --dsw-alias-interactive-bg-hover: rgba(38, 49, 72, 0.06);
+  --dsw-alias-interactive-bg-active: rgba(38, 49, 72, 0.1);
+  --dsw-alias-brand-primary: rgb(var(--ds-rgb-bluish-1000));
+  --dsw-alias-brand-text: rgb(var(--ds-rgb-bluish-1000));
+  --dsw-alias-button-primary-fill: rgb(var(--ds-rgb-bluish-1000));
+  --dsw-alias-button-primary-hover: rgb(var(--ds-rgb-bluish-750));
+  --dsw-alias-button-elevated-fill: rgb(var(--ds-rgb-bluish-00));
+  --dsw-alias-button-contrast-fill: rgb(var(--ds-rgb-bluish-700));
+  --dsw-alias-button-floating-fill: rgb(var(--ds-rgb-bluish-00));
+  --dsw-alias-button-floating-hover: rgb(var(--ds-rgb-bluish-75));
+  --dsw-alias-state-business-primary: rgb(var(--ds-rgb-deepseek-500));
+  --dsw-alias-state-error-primary: rgb(var(--ds-rgb-red-550));
+  --dsw-alias-state-success-primary: rgb(var(--ds-rgb-green-500));
+  --dsw-alias-state-warn-primary: rgb(var(--ds-rgb-amber-500));
+  --dsw-alias-toast-bg: rgb(var(--ds-rgb-bluish-800));
+  --dsw-alias-tooltip-bg: rgb(var(--ds-rgb-bluish-850));
+  --dsw-alias-bg-skeleton: rgba(0, 0, 0, 0.04);
+  --dsw-alias-bg-mask-1: rgba(0, 0, 0, 0.24);
+  --dsw-alias-markdown-inline-code: rgb(var(--ds-rgb-neutral-50));
+  --dsw-alias-markdown-code-block: rgb(var(--ds-rgb-bluish-50));
+  --dsw-alias-scrollbar-bg-l1: rgb(var(--ds-rgb-neutral-200));
+  --dsw-alias-scrollbar-bg-l2: rgb(var(--ds-rgb-neutral-200));
+  --dsw-alias-scrollbar-hover-l1: rgb(var(--ds-rgb-neutral-300));
+  --dsw-alias-scrollbar-hover-l2: rgb(var(--ds-rgb-neutral-300));
+  --dsw-specific-menu: rgba(248, 249, 250, 0.58);
+  --dsw-specific-bubble: rgb(var(--ds-rgb-deepseek-50));
+  --dsw-specific-input-major: rgb(var(--ds-rgb-bluish-00));
+  --dsw-specific-selector: rgb(var(--ds-rgb-bluish-60));
+  --dsw-specific-sidebar-fill: rgb(var(--ds-rgb-bluish-50));
+  --dsw-specific-sidebar-nav-item-hover: rgb(var(--ds-rgb-bluish-75));
+  --dsw-specific-sidebar-nav-item-active: rgb(var(--ds-rgb-bluish-100));
+  --dsw-specific-sidebar-nav-item-active-accent: rgb(var(--ds-rgb-deepseek-100));
+  --dsw-specific-tip: rgb(var(--ds-rgb-bluish-60));
+  --dsw-alias-switch-thumb: rgb(var(--ds-rgb-bluish-00));
+  --dsw-menu-surface-fill: var(--dsw-specific-menu);
+}
+
+/* ── BDS semantic layer ────────────────────────────────────────────────────
+   Declared for both themes so the fallback chain resolves per element (custom
+   properties substitute where they are declared — body carries the dark
+   fallbacks, html carries the light ones). Host values always win. */
+:root,
+body[data-ds-dark-theme],
+body.dark,
+html.dark {
+  /* surfaces — menus/dialogs use the platform layers, the drawer the layer-2 card */
+  --bds-surface: var(--dsw-alias-bg-layer-2, var(--dsr-bg, #ffffff));
+  --bds-surface-raised: var(--dsw-alias-bg-layer-1, var(--dsr-bg, #ffffff));
+  --bds-surface-subtle: var(--dsw-alias-button-floating-hover,
+      var(--dsr-button-grey-1, rgb(var(--ds-rgb-input, 245 245 245))));
+  --bds-surface-control: var(--dsw-alias-button-elevated-fill,
+      var(--dsr-button-grey-2, rgb(var(--ds-rgb-input, 245 245 245))));
+  --bds-surface-page: var(--dsr-bg, #ffffff);
+  --bds-surface-sidebar: var(--dsw-specific-sidebar-fill, var(--dsr-side-bg, #f9fbff));
+  --bds-surface-menu: var(--dsw-specific-menu, rgb(var(--ds-rgb-elevated, 255 255 255)));
+  --bds-fill-hover: var(--dsw-alias-interactive-bg-hover, rgb(var(--ds-rgb-hover, 245 245 245)));
+  --bds-fill-active: var(--dsw-alias-interactive-bg-active, var(--dsr-button-grey-0, #ededed));
+  --bds-fill-ghost-hover: var(--dsr-button-grey-1, #f5f5f5);
+
+  /* text */
+  --bds-text-strong: var(--dsw-alias-label-primary, var(--dsr-text-0, #000000));
+  --bds-text-primary: var(--dsw-alias-label-primary, var(--dsr-text-1, #262626));
+  --bds-text-secondary: var(--dsw-alias-label-secondary, var(--dsr-text-2, #525252));
+  --bds-text-tertiary: var(--dsw-alias-label-tertiary, var(--dsr-text-3, #a3a3a3));
+  --bds-text-quaternary: var(--dsw-alias-label-caption, var(--dsr-text-4, #babac1));
+  --bds-text-dimmed: var(--dsw-alias-label-dimmed, var(--dsr-text-4, #e1e5ee));
+  --bds-text-on-accent: var(--dsw-alias-label-primary-foreground,
+      rgb(var(--ds-rgb-primary-foreground, 255 255 255)));
+
+  /* lines */
+  --bds-border: var(--dsw-alias-border-l2, var(--dsr-border-2, #e5e5e5));
+  --bds-border-subtle: var(--dsw-alias-border-l1, var(--dsr-border-2, #f5f5f5));
+  --bds-border-strong: var(--dsw-alias-border-l3, var(--dsr-border-1, #bbbbbb));
+  --bds-border-prominent: var(--dsw-alias-border-l4, var(--dsr-border-1, #bbbbbb));
+  --bds-divider: var(--dsw-alias-border-l1, rgb(var(--ds-rgb-separator, 245 245 245)));
+  --bds-divider-strong: var(--dsw-alias-border-l2, rgb(var(--ds-rgb-separator-strong, 229 229 229)));
+
+  /* accent + states */
+  --bds-accent: var(--dsr-main, var(--dsw-alias-state-business-primary, #4d6bfe));
+  --bds-accent-hover: var(--dsr-button-main-bg-hover, #4166d5);
+  --bds-accent-soft: var(--dsr-button-second-bg, rgba(77, 107, 254, 0.2));
+  --bds-accent-glow: color-mix(in srgb, var(--bds-accent) 14%, transparent);
+  --bds-link: var(--dsw-alias-state-business-primary, var(--dsr-main, #4d6bfe));
+  --bds-danger: var(--dsw-alias-state-error-primary, rgb(var(--ds-rgb-error, 239 68 68)));
+  --bds-danger-hover: rgb(var(--ds-rgb-red-550, 229 53 53));
+  --bds-danger-border: color-mix(in srgb, var(--bds-danger) 45%, transparent);
+  --bds-danger-soft: color-mix(in srgb, var(--bds-danger) 8%, transparent);
+  --bds-warning-soft: color-mix(in srgb, var(--bds-warning) 10%, transparent);
+  --bds-success-soft: color-mix(in srgb, var(--bds-success) 10%, transparent);
+  --bds-success: var(--dsw-alias-state-success-primary, rgb(var(--ds-rgb-success, 34 197 94)));
+  --bds-warning: var(--dsw-alias-state-warn-primary, rgb(var(--ds-rgb-warning, 245 158 11)));
+
+  /* inputs */
+  --bds-input-bg: var(--dsw-alias-bg-layer-1, var(--dsr-input-bg, #f3f4f6));
+  --bds-input-bg-strong: var(--dsw-alias-bg-layer-2, var(--dsr-input-bg, #f3f4f6));
+  --bds-input-border: var(--dsw-alias-border-l4, var(--dsr-input-border, #dce0e9));
+  --bds-input-focus-border: var(--bds-accent);
+
+  /* shape + depth — platform radii, site control recipe as fallback */
+  --bds-radius-xs: var(--dsw-radius-xs, 6px);
+  --bds-radius-sm: var(--dsw-radius-sm, 8px);
+  --bds-radius-md: var(--dsw-radius-md, var(--ds-input-border-radius, 10px));
+  --bds-radius-lg: var(--dsw-radius-lg, 12px);
+  --bds-radius-xl: var(--dsw-radius-xl, 16px);
+  --bds-radius-modal: var(--dsw-radius-modal, 18px);
+  --bds-radius-pill: 999px;
+  --bds-shadow-menu: var(--dsw-elevation-menu, 0 8px 24px rgba(0, 0, 0, 0.12));
+  --bds-shadow-modal: var(--dsw-elevation-menu, 0 8px 24px rgba(0, 0, 0, 0.12));
+  --bds-shadow-soft: var(--dsw-elevation-panel, 0 2px 8px rgba(0, 0, 0, 0.06));
+  --bds-shadow: var(--bds-shadow-menu);
+
+  /* motion */
+  --bds-ease: var(--ds-ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
+  --bds-duration: var(--ds-transition-duration, 0.2s);
+  --bds-duration-fast: var(--ds-transition-duration-fast, 0.1s);
+  --bds-transition: var(--bds-duration) var(--bds-ease);
+
+  /* focus ring (platform contract: 2px, business accent, offset 2px) */
+  --bds-focus-ring: 0 0 0 var(--dsw-focus-ring-width, 2px) var(--bds-accent);
+
+  /* typography */
+  --bds-font-size-l: var(--ds-font-size-l, 16px);
+  --bds-font-size-m: var(--ds-font-size-m, 14px);
+  --bds-font-size-sp: var(--ds-font-size-sp, 13px);
+  --bds-font-size-s: var(--ds-font-size-s, 12px);
+  --bds-font-size-xs: var(--ds-font-size-xs, 10px);
+  --bds-line-height-m: var(--ds-line-height-m, 25px);
+  --bds-font-family-code: var(--ds-font-family-code, Menlo, monospace);
+
+  /* legacy aliases — every pre-existing component keeps working, repainted */
+  --bds-bg-panel: var(--bds-surface);
+  --bds-bg-elevated: var(--bds-surface-subtle);
+  --bds-bg-hover: var(--bds-fill-hover);
+  --bds-bg-input: var(--bds-input-bg);
+  --bds-bg-chat-user: var(--dsw-specific-bubble, rgb(var(--ds-rgb-input, 245 245 245)));
+  --bds-bg: var(--bds-surface-page);
+  --bds-bg-code: var(--dsw-alias-markdown-code-block, rgb(var(--ds-rgb-input, 245 245 245)));
+  --bds-radius: var(--bds-radius-lg);
+  --bds-icon-size: 18px;
+  --bds-control-height: var(--ds-input-height-m, 34px);
+  --bds-z-menu: 2147483000;
+}
+
+/* ── Root surface ──────────────────────────────────────────────────────────
+   #bds-root itself must stay layout-neutral: it is the fixed shell that holds
+   every overlay, panel and toast. */
+#bds-root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+  font-size: var(--bds-font-size-m);
+  line-height: var(--bds-line-height-m);
+  color: var(--bds-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+}
+
+/* Native scrollbars inside BDS surfaces (the app styles its own this way). */
+#bds-root * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--dsw-alias-scrollbar-bg-l1, var(--bds-border-strong)) transparent;
+}
+
+#bds-root *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+#bds-root *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#bds-root *::-webkit-scrollbar-thumb {
+  background: var(--dsw-alias-scrollbar-bg-l1, var(--bds-border));
+  border-radius: var(--bds-radius-pill);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+#bds-root *::-webkit-scrollbar-thumb:hover {
+  background: var(--dsw-alias-scrollbar-hover-l1, var(--bds-border-strong));
+  background-clip: content-box;
+}
