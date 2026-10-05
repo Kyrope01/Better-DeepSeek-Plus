@@ -169,7 +169,7 @@
   .bds-modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--dsw-alias-bg-mask-1, rgba(0, 0, 0, 0.5));
     backdrop-filter: blur(4px);
     z-index: 2147483647;
     display: flex;

@@ -213,7 +213,15 @@
       "advancedSearchPlaceholder": "Ayarlarda ara...",
       "advancedNoResults": "Eşleşen ayar bulunamadı.",
       "disableTipBox": "İpucu Kutusunu Devre Dışı Bırak",
-      "disableTipBoxHint": "Drawer her açıldığında rastgele bir ipucu gösterir."
+      "disableTipBoxHint": "Drawer her açıldığında rastgele bir ipucu gösterir.",
+      "nativeHint": "Tüm Better DeepSeek ayarları bu sayfada. Aynı ayarlar kenar çubuğunda (BDS düğmesi) da bulunur.",
+      "openInSidebar": "Kenar çubuğunda aç",
+      "deepFetchDepth": "Web arama getirme derinliği",
+      "deepFetchDepthHint": "Deep Research bir sayfayı okurken kaç bağlantı seviyesi takip eder (0–5).",
+      "showFloatingButton": "Yüzen BDS düğmesini göster",
+      "showFloatingButtonHint": "Sayfanın köşesinde yüzen BDS düğmesini gösterir. Varsayılan olarak kapalıdır — tüm ayarlar DeepSeek'in kendi ayarlar penceresinde bulunur.",
+      "nativeAttachFailed": "Better DeepSeek paneli bu pencereye ekleyemedi. Konsolda (F12) __BDS_DIAG__.force() çalıştırıp çıktıyı gönderin veya uzantının kenar çubuğunu kullanın.",
+      "showFloatingButtonShort": "BDS düğmesi"
     },
     "skillList": {
       "title": "Yetenek Seti",

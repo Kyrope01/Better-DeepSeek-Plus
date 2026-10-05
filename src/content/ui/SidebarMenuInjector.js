@@ -208,6 +208,7 @@ function injectSettingsDrawerOptions(menu) {
   );
 
   bdsOption.parentNode.insertBefore(whatsNewOption, bdsOption.nextSibling);
+
 }
 
 function createMenuOption(label, iconHtml, className, onClick) {

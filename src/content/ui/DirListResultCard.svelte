@@ -100,9 +100,9 @@
     width: 100%;
     max-width: 100%;
     min-width: 0;
-    border: 1px solid var(--bds-border, #3a3b3f);
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 12px;
-    background: var(--bds-bg-panel, #1e1f23);
+    background: var(--bds-bg-panel, var(--bds-surface));
     overflow: hidden;
     font-family: inherit;
     transition: border-color 0.2s ease;
@@ -113,7 +113,7 @@
   }
 
   .bds-dir-list-error {
-    border-left: 3px solid #ef4444;
+    border-left: 3px solid var(--bds-danger);
   }
 
   .bds-dir-list-header {
@@ -137,17 +137,17 @@
     justify-content: center;
     width: 36px;
     height: 36px;
-    background: rgba(168, 85, 247, 0.1);
-    border: 1px solid rgba(168, 85, 247, 0.25);
+    background: var(--bds-accent-soft);
+    border: 1px solid var(--bds-accent);
     border-radius: 8px;
-    color: #a855f7;
+    color: var(--bds-accent);
     flex-shrink: 0;
   }
 
   .bds-dir-list-icon-error {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.25);
-    color: #ef4444;
+    background: var(--bds-danger-soft);
+    border-color: var(--bds-danger-soft);
+    color: var(--bds-danger);
   }
 
   .bds-dir-list-details {
@@ -159,7 +159,7 @@
     margin: 0;
     font-size: 13.5px;
     font-weight: 600;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -169,18 +169,18 @@
   .bds-dir-list-subtitle {
     margin: 2px 0 0;
     font-size: 11px;
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .bds-dir-list-error-msg {
-    color: #ef4444;
+    color: var(--bds-danger);
   }
 
   .bds-dir-list-entries {
-    border-top: 1px solid var(--bds-border, #3a3b3f);
+    border-top: 1px solid var(--bds-border, var(--bds-border));
   }
 
   .bds-dir-list-entry {
@@ -188,9 +188,9 @@
     align-items: center;
     gap: 8px;
     padding: 6px 14px;
-    border-bottom: 1px solid var(--bds-border, #3a3b3f);
+    border-bottom: 1px solid var(--bds-border, var(--bds-border));
     font-size: 12.5px;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     transition: background 0.15s ease;
   }
 
@@ -209,11 +209,11 @@
     width: 20px;
     height: 20px;
     flex-shrink: 0;
-    color: var(--bds-text-secondary, #8e8ea0);
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
   }
 
   .bds-dir-list-entry-dir .bds-dir-list-entry-icon {
-    color: #fbbf24;
+    color: var(--bds-warning);
   }
 
   .bds-dir-list-entry-name {
@@ -227,9 +227,9 @@
 
   .bds-dir-list-entry-type {
     font-size: 10px;
-    background: var(--bds-bg-elevated, #2a2b30);
-    color: var(--bds-text-secondary, #8e8ea0);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
+    border: 1px solid var(--bds-border, var(--bds-border));
     padding: 1px 5px;
     border-radius: 4px;
     flex-shrink: 0;
@@ -241,7 +241,7 @@
     padding: 14px;
     text-align: center;
     font-size: 12px;
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
   }
   .bds-dir-list-empty p {
     margin: 0;

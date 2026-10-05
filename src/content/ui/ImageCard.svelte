@@ -184,8 +184,8 @@
   .bds-image-card {
     border-radius: 12px;
     overflow: hidden;
-    border: 1px solid var(--bds-border, #3a3b3f);
-    background: var(--bds-bg-panel, #1e1f23);
+    border: 1px solid var(--bds-border, var(--bds-border));
+    background: var(--bds-bg-panel, var(--bds-surface));
     margin: 10px 0;
     max-width: 100%;
     min-height: 100px;
@@ -213,7 +213,7 @@
     width: 100%;
     height: 100%;
     border-radius: 12px;
-    background: var(--bds-bg-elevated, #2a2b30);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
     animation: bds-shimmer 1.6s ease-in-out infinite;
   }
 
@@ -265,7 +265,7 @@
   }
 
   .bds-image-caption {
-    color: #fff;
+    color: var(--bds-surface);
     font-size: 13px;
     font-weight: 500;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
@@ -282,7 +282,7 @@
   }
 
   .bds-image-credit:hover {
-    color: #fff;
+    color: var(--bds-surface);
     text-decoration: underline;
   }
 
@@ -292,7 +292,7 @@
     gap: 8px;
     padding: 18px 16px;
     justify-content: center;
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
     font-size: 13px;
   }
 
@@ -302,7 +302,7 @@
   }
 
   .bds-image-error-text {
-    color: var(--bds-text-secondary, #8e8ea0);
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
   }
 
   .bds-image-fullscreen {
@@ -343,7 +343,7 @@
     border-radius: 50%;
     border: none;
     background: rgba(255, 255, 255, 0.15);
-    color: #fff;
+    color: var(--bds-surface);
     font-size: 22px;
     line-height: 1;
     cursor: pointer;

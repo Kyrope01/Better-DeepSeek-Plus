@@ -966,6 +966,10 @@ export const DEFAULT_SETTINGS = {
   loadAllHistoryOnSession: false,
   showTimestamps: false,
   disableTipBox: false,
+  // Floating "BDS" button on the page. "auto" hides it as soon as the extension's
+  // settings are reachable from DeepSeek's own Settings dialog (the button is only
+  // a fallback), "always" keeps it pinned in the corner.
+  floatingButton: "auto",
 };
 
 // ── Default Remote Config (built-in fallback) ──

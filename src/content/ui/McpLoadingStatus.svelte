@@ -35,18 +35,18 @@
     gap: 12px;
     padding: 12px 16px;
     margin: 8px 0;
-    background: var(--bds-bg-panel, #1e1f23);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    background: var(--bds-bg-panel, var(--bds-surface));
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 10px;
-    border-left: 3px solid #8b5cf6;
+    border-left: 3px solid var(--bds-accent);
     animation: mcpFadeIn 0.3s ease-in-out;
   }
 
   .bds-mcp-loading-spinner {
     width: 18px;
     height: 18px;
-    border: 2px solid var(--bds-border, #3a3b3f);
-    border-top-color: #8b5cf6;
+    border: 2px solid var(--bds-border, var(--bds-border));
+    border-top-color: var(--bds-accent);
     border-radius: 50%;
     animation: mcpSpin 0.8s linear infinite;
     flex-shrink: 0;
@@ -63,12 +63,12 @@
   .bds-mcp-loading-title {
     font-size: 13px;
     font-weight: 600;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
   }
 
   .bds-mcp-loading-server {
     font-size: 11px;
-    color: var(--bds-text-secondary, #8e8ea0);
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -76,7 +76,7 @@
 
   .bds-mcp-loading-args {
     font-size: 10px;
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
     font-family: monospace;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -132,7 +132,7 @@
   }
 
   .bds-expand-toggle.expanded {
-    color: #fff;
+    color: var(--bds-surface);
     background: var(--bds-accent);
     border-color: var(--bds-accent);
   }

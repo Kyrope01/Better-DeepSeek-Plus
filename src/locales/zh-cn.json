@@ -212,7 +212,15 @@
       "advancedSearchPlaceholder": "搜索设置…",
       "advancedNoResults": "未找到匹配的设置。",
       "disableTipBox": "禁用提示框",
-      "disableTipBoxHint": "每次打开抽屉时显示随机提示。"
+      "disableTipBoxHint": "每次打开抽屉时显示随机提示。",
+      "nativeHint": "Better DeepSeek 的所有设置都在这个页面上。相同的设置也可以在侧边栏（BDS 按钮）中打开。",
+      "openInSidebar": "在侧边栏中打开",
+      "deepFetchDepth": "网页抓取深度",
+      "deepFetchDepthHint": "深度研究读取网页时跟随链接的层级数（0–5）。",
+      "showFloatingButton": "显示悬浮的 BDS 按钮",
+      "showFloatingButtonHint": "在页面右上角显示悬浮的 BDS 按钮。默认关闭——所有设置均可在 DeepSeek 自己的设置窗口中找到。",
+      "nativeAttachFailed": "Better DeepSeek 无法将面板添加到此窗口。请在控制台（F12）运行 __BDS_DIAG__.force() 并发送输出，或使用扩展的侧边栏。",
+      "showFloatingButtonShort": "BDS 按钮"
     },
     "skillList": {
       "title": "技能集",

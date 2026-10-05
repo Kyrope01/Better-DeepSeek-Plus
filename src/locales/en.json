@@ -213,7 +213,15 @@
       "advancedSearchPlaceholder": "Search settings...",
       "advancedNoResults": "No matching settings found.",
       "disableTipBox": "Disable Tip Box",
-      "disableTipBoxHint": "Shows a random tip each time you open the drawer."
+      "disableTipBoxHint": "Shows a random tip each time you open the drawer.",
+      "nativeHint": "Every Better DeepSeek setting is on this page. The same settings also live in the sidebar (the BDS button) for quick access.",
+      "openInSidebar": "Open in sidebar",
+      "deepFetchDepth": "Web search fetch depth",
+      "deepFetchDepthHint": "How many levels of links Deep Research follows while reading a page (0–5).",
+      "showFloatingButton": "Show the floating BDS button",
+      "showFloatingButtonHint": "Shows the floating BDS button in the corner of the page. Off by default — every setting is available in DeepSeek's own Settings dialog.",
+      "nativeAttachFailed": "Better DeepSeek could not add its panel to this dialog. Run __BDS_DIAG__.force() in the console (F12) and send the output, or use the extension's sidebar.",
+      "showFloatingButtonShort": "BDS button"
     },
     "skillList": {
       "title": "Skill Set",

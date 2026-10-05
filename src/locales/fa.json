@@ -212,7 +212,15 @@
       "advancedSearchPlaceholder": "جستجوی تنظیمات...",
       "advancedNoResults": "تنظیمات منطبقی یافت نشد.",
       "disableTipBox": "غیرفعال‌کردن جعبه نکته",
-      "disableTipBoxHint": "هر بار که کشو باز می‌شود یک نکته تصادفی نشان می‌دهد."
+      "disableTipBoxHint": "هر بار که کشو باز می‌شود یک نکته تصادفی نشان می‌دهد.",
+      "nativeHint": "همه تنطیمات Better DeepSeek در همین صفحه است. همین تنطیمات در نوار کناری (دکمه BDS) نیز هست.",
+      "openInSidebar": "باز کردن در نوار کناری",
+      "deepFetchDepth": "عمق واکشی جستجوی وب",
+      "deepFetchDepthHint": "مقدار سطوح پیوندهایی که Deep Research هنگام خواندن یک صفحه دنبال می‌کند (۰–۵).",
+      "showFloatingButton": "نمایش دکمه شناور BDS",
+      "showFloatingButtonHint": "دکمه شناور BDS را در گوشه صفحه نشان می‌دهد. به طور پیش‌فرض خاموش است — همه تنطیمات در پنجره تنطیمات DeepSeek موجود است.",
+      "nativeAttachFailed": "Better DeepSeek نتوانست پنل را به این پنجره اضافه کند. در کنسول (F12) دستور __BDS_DIAG__.force() را اجرا کنید و خروجی را بفرستید، یا از نوار کناری افزونه استفاده کنید.",
+      "showFloatingButtonShort": "دکمه BDS"
     },
     "skillList": {
       "title": "مجموعه مهارت",

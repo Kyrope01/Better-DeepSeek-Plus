@@ -706,8 +706,8 @@
   }
 
   .bds-live__status[data-phase="listening"] { --phase-fg: var(--bds-accent); }
-  .bds-live__status[data-phase="thinking"]  { --phase-fg: #f59e0b; }
-  .bds-live__status[data-phase="speaking"]  { --phase-fg: #a855f7; }
+  .bds-live__status[data-phase="thinking"]  { --phase-fg: var(--bds-warning); }
+  .bds-live__status[data-phase="speaking"]  { --phase-fg: var(--bds-accent); }
   .bds-live__status[data-phase="muted"],
   .bds-live__status--muted                  { --phase-fg: var(--bds-danger); }
   .bds-live__status[data-phase="idle"]      { --phase-fg: var(--bds-text-tertiary); }
@@ -911,7 +911,7 @@
     height: 54px;
     margin: 0 auto 14px;
     border-radius: 50%;
-    color: #f87171;
+    color: var(--bds-danger);
     background: rgba(248, 113, 113, 0.12);
     border: 1px solid rgba(248, 113, 113, 0.3);
   }
@@ -1027,7 +1027,7 @@
     font-family: inherit;
     font-size: 12px;
     font-weight: 600;
-    color: #ffffff;
+    color: var(--bds-surface);
     background: var(--bds-danger);
     transition: all var(--bds-transition);
   }

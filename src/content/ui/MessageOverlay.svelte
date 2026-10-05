@@ -603,8 +603,8 @@
 
 <style>
   .bds-question-info-card {
-    background: var(--bds-bg-panel, #1e1f23);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    background: var(--bds-bg-panel, var(--bds-surface));
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 12px;
     padding: 16px;
     display: flex;
@@ -620,7 +620,7 @@
   .bds-question-icon {
     font-size: 20px;
     background: var(--bds-bg-hover, rgba(255, 255, 255, 0.08));
-    color: var(--bds-accent, #5b7bff);
+    color: var(--bds-accent, var(--bds-accent));
     width: 44px;
     height: 44px;
     border-radius: 50%;
@@ -633,7 +633,7 @@
   .bds-question-title {
     font-weight: 600;
     font-size: 15px;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
   }
 
   .bds-question-content {
@@ -644,7 +644,7 @@
 
   .bds-question-subtitle {
     font-size: 13px;
-    color: var(--bds-text-secondary, #8e8ea0);
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
     margin-top: 2px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -652,21 +652,21 @@
   }
 
   .bds-character-icon {
-    color: #10b981; /* Emerald Green for success/creation */
-    background: rgba(16, 185, 129, 0.1);
+    color: var(--bds-success); /* Emerald Green for success/creation */
+    background: var(--bds-success-soft);
   }
 
   .bds-character-card {
-    border-left: 3px solid #10b981;
+    border-left: 3px solid var(--bds-success);
   }
 
   .bds-skill-icon {
-    color: #8b5cf6;
+    color: var(--bds-accent);
     background: rgba(139, 92, 246, 0.1);
   }
 
   .bds-skill-card {
-    border-left: 3px solid #8b5cf6;
+    border-left: 3px solid var(--bds-accent);
   }
 
   .bds-web-fetch-icon {
@@ -688,39 +688,39 @@
   }
 
   .bds-search-info-icon {
-    color: #22c55e;
-    background: rgba(34, 197, 94, 0.1);
+    color: var(--bds-success);
+    background: var(--bds-success-soft);
   }
 
   .bds-search-info-card {
-    border-left: 3px solid #22c55e;
+    border-left: 3px solid var(--bds-success);
   }
 
   .bds-file-read-icon {
-    color: #3b82f6;
+    color: var(--bds-accent);
     background: rgba(59, 130, 246, 0.1);
   }
 
   .bds-file-read-card {
-    border-left: 3px solid #3b82f6;
+    border-left: 3px solid var(--bds-accent);
   }
 
   .bds-dir-search-info-icon {
-    color: #a855f7;
-    background: rgba(168, 85, 247, 0.1);
+    color: var(--bds-accent);
+    background: var(--bds-accent-soft);
   }
 
   .bds-dir-search-info-card {
-    border-left: 3px solid #a855f7;
+    border-left: 3px solid var(--bds-accent);
   }
 
   .bds-memory-icon {
-    color: #f59e0b;
-    background: rgba(245, 158, 11, 0.1);
+    color: var(--bds-warning);
+    background: var(--bds-warning-soft);
   }
 
   .bds-memory-card {
-    border-left: 3px solid #f59e0b;
+    border-left: 3px solid var(--bds-warning);
   }
 
   /* Overrides for bds-questions-card */
@@ -759,7 +759,7 @@
   .bds-questions-card .bds-question-title {
     font-weight: 600;
     font-size: 14px;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     margin: 0;
     padding: 0;
     line-height: 1;
@@ -769,7 +769,7 @@
   .bds-questions-card .bds-q-count {
     font-weight: 500;
     font-size: 12px;
-    color: var(--bds-text-secondary, #8e8ea0);
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
     background: var(--bds-bg-hover, rgba(255, 255, 255, 0.08));
     padding: 2px 6px;
     border-radius: 6px;
@@ -777,7 +777,7 @@
 
   .bds-chevron {
     font-size: 11px;
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
     flex-shrink: 0;
     width: 16px;
     text-align: center;
@@ -790,7 +790,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    border-top: 1px solid var(--bds-border, #3a3b3f);
+    border-top: 1px solid var(--bds-border, var(--bds-border));
     background: rgba(0, 0, 0, 0.05);
   }
 
@@ -814,7 +814,7 @@
   }
 
   .bds-q-num {
-    color: var(--bds-text-secondary, #8e8ea0);
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
     font-weight: 600;
     min-width: 20px;
     flex-shrink: 0;
@@ -822,7 +822,7 @@
   }
 
   .bds-q-text {
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     flex-grow: 1;
     line-height: 1.4;
     user-select: text;
@@ -831,7 +831,7 @@
   .bds-q-type {
     font-size: 11px;
     font-weight: 500;
-    color: var(--bds-accent, #5b7bff);
+    color: var(--bds-accent, var(--bds-accent));
     background: var(--bds-bg-hover, rgba(255, 255, 255, 0.08));
     padding: 2px 8px;
     border-radius: 10px;
@@ -850,7 +850,7 @@
 
   .bds-q-options {
     font-size: 13px;
-    color: var(--bds-text-secondary, #8e8ea0);
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -871,7 +871,7 @@
   }
 
   .bds-q-answer {
-    color: var(--bds-accent, #5b7bff);
+    color: var(--bds-accent, var(--bds-accent));
     font-size: 13px;
     font-weight: 500;
     background: var(--bds-bg-hover, rgba(255, 255, 255, 0.08));
@@ -994,7 +994,7 @@
   }
 
   .bds-sanitized-text :global(a:not(.ds-a)) {
-    color: var(--dsw-alias-brand-text, var(--bds-accent, #5b7bff));
+    color: var(--dsw-alias-brand-text, var(--bds-accent, var(--bds-accent)));
     transition: box-shadow var(--ds-transition-duration) var(--ds-ease-in-out);
     border: 2px solid rgba(255,255,255,0);
     border-width: 2px 3px;
@@ -1006,13 +1006,13 @@
 
   .bds-sanitized-text :global(a:not(.ds-a):hover),
   .bds-sanitized-text :global(a:not(.ds-a):focus) {
-    -webkit-text-decoration: underline var(--dsw-alias-brand-text, var(--bds-accent, #5b7bff));
-    text-decoration: underline var(--dsw-alias-brand-text, var(--bds-accent, #5b7bff));
+    -webkit-text-decoration: underline var(--dsw-alias-brand-text, var(--bds-accent, var(--bds-accent)));
+    text-decoration: underline var(--dsw-alias-brand-text, var(--bds-accent, var(--bds-accent)));
     outline: none;
   }
 
   .bds-sanitized-text :global(a:not(.ds-a):focus-visible) {
-    box-shadow: 0 0 0 2px var(--dsw-alias-brand-text, var(--bds-accent, #5b7bff));
+    box-shadow: 0 0 0 2px var(--dsw-alias-brand-text, var(--bds-accent, var(--bds-accent)));
   }
 
   .bds-sanitized-text :global(li>ul),
@@ -1035,7 +1035,7 @@
   }
 
   .bds-sanitized-text :global(li::marker) {
-    color: var(--dsw-alias-label-secondary, var(--bds-text-secondary, #8e8ea0));
+    color: var(--dsw-alias-label-secondary, var(--bds-text-secondary, var(--bds-text-tertiary)));
     line-height: 28px;
   }
 
@@ -1051,7 +1051,7 @@
   }
 
   .bds-sanitized-text :global(hr) {
-    background: var(--dsw-alias-border-l2, var(--bds-border, #3a3b3f));
+    background: var(--dsw-alias-border-l2, var(--bds-border, var(--bds-border)));
     border: none;
     height: 1px;
     margin: 32px 0;
@@ -1059,7 +1059,7 @@
   }
 
   .bds-sanitized-text :global(blockquote) {
-    border-left: 2px solid var(--dsw-alias-label-caption, var(--bds-text-tertiary, #6b6b7b));
+    border-left: 2px solid var(--dsw-alias-label-caption, var(--bds-text-tertiary, var(--bds-text-tertiary)));
     margin: 16px 0;
     padding-left: 14px;
   }
@@ -1095,7 +1095,7 @@
   }
 
   .bds-sanitized-text :global(td) {
-    border-bottom: 1px solid var(--dsw-alias-border-l2, var(--bds-border, #3a3b3f));
+    border-bottom: 1px solid var(--dsw-alias-border-l2, var(--bds-border, var(--bds-border)));
     font: var(--dsw-font-markdown-table, 1em inherit);
     min-width: 100px;
     max-width: min(30vw,320px);
@@ -1173,9 +1173,9 @@
   align-items: center;
   justify-content: center;
   background: none;
-  border: 1px solid var(--bds-border, #3a3b3f);
+  border: 1px solid var(--bds-border, var(--bds-border));
   border-radius: 8px;
-  color: var(--bds-text-secondary, #8e8ea0);
+  color: var(--bds-text-secondary, var(--bds-text-tertiary));
   cursor: pointer;
   width: 34px;
   height: 34px;
@@ -1186,8 +1186,8 @@
 }
 .bds-md-download-btn:hover {
   background: var(--bds-bg-hover, rgba(255,255,255,0.08));
-  color: var(--bds-accent, #5b7bff);
-  border-color: var(--bds-accent, #5b7bff);
+  color: var(--bds-accent, var(--bds-accent));
+  border-color: var(--bds-accent, var(--bds-accent));
 }
 
 </style>

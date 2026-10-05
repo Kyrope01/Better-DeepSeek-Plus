@@ -15,7 +15,11 @@
  */
 
 import "bds-platform-globals";
+// Stylesheet order matters: tokens → structural layout → native control kit.
+// All three are bundled into the single content.css asset (cssCodeSplit: false).
+import "../styles/bds-theme.css";
 import "../styles/content.css";
+import "../styles/bds-components.css";
 
 import state from "./state.js";
 import { setDevLogging } from "../lib/dev-log.js";
@@ -25,6 +29,7 @@ import { mountUi } from "./ui/mount.js";
 import { observeChatDom, scheduleScan, startUrlWatcher } from "./scanner.js";
 import { initSidebarMenuInjector } from "./ui/SidebarMenuInjector.js";
 import { initSidebarSearch } from "./ui/SidebarSearch.js";
+import { initNativeSettings } from "./ui/native-settings.js";
 import { checkPendingExport } from "./tools/pending-export.js";
 import { checkPendingContextPrompt } from "./tools/pending-context-prompt.js";
 import { initPricing } from "../lib/pricing.js";
@@ -35,6 +40,7 @@ import { loadDeepCodeState } from "./deep-code.js";
 import { i18n } from "../lib/i18n.svelte.js";
 import { remoteConfig, REMOTE_CONFIG_EVENT, detectModelType } from "../lib/remote-config.svelte.js";
 import { STORAGE_KEYS, CSS_PRESETS } from "../lib/constants.js";
+import { getExtensionVersion } from "../lib/extension-version.js";
 import { loadAllHistory, retainOnlyHistorySession } from "./load-all-history.js";
 
 const CONTENT_BOOTSTRAP_KEY = "__bdsContentBootstrapped";
@@ -75,8 +81,24 @@ async function init() {
   bindStorageChangeListener();
   startUrlWatcher();
   observeChatDom();
-  initSidebarMenuInjector();
-  initSidebarSearch();
+  // Each late-stage integration is guarded: one failure must never stop the
+  // others (this bootstrap is a single async chain, so an exception here used to
+  // silently disable every feature declared after it).
+  const safeInit = (name, fn) => {
+    try {
+      fn();
+    } catch (error) {
+      console.error(`[BDS] ${name} failed to initialise:`, error);
+    }
+  };
+
+  safeInit("sidebar menu", () => initSidebarMenuInjector());
+  safeInit("sidebar search", () => initSidebarSearch());
+  // Surface the extension's settings inside DeepSeek's own Settings dialog.
+  safeInit("native settings bridge", () => {
+    initNativeSettings();
+    console.info(`[BDS] settings bridge active (v${getExtensionVersion()})`);
+  });
   scheduleScan();
   checkPendingExport();
   checkPendingMemoryImport();

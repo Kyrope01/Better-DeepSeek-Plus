@@ -655,8 +655,7 @@
             <div style="display: flex; gap: 4px;">
               <button
                 type="button"
-                class="bds-btn-outlined"
-                style="font-size: 11px; padding: 3px 8px;"
+                class="bds-btn-outlined bds-btn-xs"
                 onclick={() => exportFile(file)}
                 title={t('projectsManager.downloadFile', { name: file.name })}
               >
@@ -664,8 +663,7 @@
               </button>
               <button
                 type="button"
-                class="bds-btn-danger"
-                style="font-size: 11px; padding: 3px 8px;"
+                class="bds-btn-danger bds-btn-xs"
                 onclick={() => handleDeleteFile(file)}
                 title={t('projectsManager.removeFile', { name: file.name })}
               >
@@ -827,7 +825,7 @@
     margin: 0 0 6px;
   }
   .bds-field-error {
-    color: #e05252;
+    color: var(--bds-danger);
     font-size: 11px;
     margin: 2px 0 0;
   }
@@ -890,7 +888,7 @@
     opacity: 0.6;
   }
   .bds-linked-dir-warning {
-    color: #e05252;
+    color: var(--bds-danger);
     font-weight: 500;
   }
   .bds-linked-dir-actions {

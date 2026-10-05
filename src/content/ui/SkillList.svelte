@@ -233,7 +233,7 @@
             </div>
           </label>
           <div style="display: flex; gap: 6px;">
-            <button type="button" class="bds-btn-outlined" style="font-size: 11px; padding: 4px 8px;" onclick={() => startEdit(skill)}>
+            <button type="button" class="bds-btn-outlined bds-btn-xs" onclick={() => startEdit(skill)}>
               {t('skillList.edit')}
             </button>
             <button type="button" class="bds-btn-danger" onclick={() => deleteSkill(skill.id)}>

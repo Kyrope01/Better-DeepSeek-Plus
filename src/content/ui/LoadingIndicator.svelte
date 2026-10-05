@@ -36,10 +36,10 @@
     font-weight: 500;
     letter-spacing: 0.5px;
     color: #888;
-  }
-
-  :global(.dark) .bds-loading-text {
-    color: #999;
+  }:global(body[data-ds-dark-theme]) .bds-loading-text,
+  :global(body.dark) .bds-loading-text,
+  :global(html.dark) .bds-loading-text {
+    color: var(--bds-text-tertiary);
   }
 
   @keyframes fadeIn {

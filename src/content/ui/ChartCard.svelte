@@ -5,6 +5,7 @@
   import { parseLooseJson } from "../parser/json-repair.js";
   import { triggerBlobDownload, triggerTextDownload } from "../../lib/utils/download.js";
   import { t } from "../../lib/i18n.svelte.js";
+  import { isPageDark, readPageToken, PAGE_THEME_ATTRIBUTES } from "../../lib/page-theme.js";
 
   /**
    * @type {{
@@ -74,25 +75,44 @@
   });
 
   function detectTheme() {
-    if (typeof document === "undefined") return false;
-    return (
-      document.documentElement?.classList.contains("dark") ||
-      document.body?.classList.contains("dark") ||
-      (typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)
-    );
+    return isPageDark();
+  }
+
+  // Chart text/grid follow the page's own tokens so the chart is painted with the
+  // same colours as the rest of the conversation (including user site themes).
+  function chartColors(isDark) {
+    if (isDark) {
+      return {
+        domain: readPageToken("--dsr-border-2", "#3f3f46"),
+        grid: readPageToken("--dsr-border-2", "#27272a"),
+        label: readPageToken("--dsr-text-3", "#a1a1aa"),
+        label2: readPageToken("--dsr-text-2", "#e4e4e7"),
+        title: readPageToken("--dsr-text-1", "#e4e4e7"),
+        title2: readPageToken("--dsr-text-0", "#f4f4f5"),
+      };
+    }
+    return {
+      domain: readPageToken("--dsr-border-2", "#e4e4e7"),
+      grid: readPageToken("--dsr-border-2", "#f4f4f5"),
+      label: readPageToken("--dsr-text-3", "#71717a"),
+      label2: readPageToken("--dsr-text-2", "#27272a"),
+      title: readPageToken("--dsr-text-1", "#18181b"),
+      title2: readPageToken("--dsr-text-0", "#09090b"),
+    };
   }
 
   function getVegaConfig(isDark) {
+    const c = chartColors(isDark);
     if (isDark) {
       return {
         background: "transparent",
         axis: {
-          domainColor: "#3f3f46",
-          gridColor: "#27272a",
+          domainColor: c.domain,
+          gridColor: c.grid,
           gridDash: [3, 3],
-          tickColor: "#3f3f46",
-          labelColor: "#a1a1aa",
-          titleColor: "#e4e4e7",
+          tickColor: c.domain,
+          labelColor: c.label,
+          titleColor: c.title,
           labelFont: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
           titleFont: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
           labelFontSize: 11,
@@ -100,8 +120,8 @@
           titleFontWeight: 500,
         },
         legend: {
-          labelColor: "#e4e4e7",
-          titleColor: "#f4f4f5",
+          labelColor: c.label2,
+          titleColor: c.title2,
           labelFont: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
           titleFont: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
           labelFontSize: 11,
@@ -132,12 +152,12 @@
     return {
       background: "transparent",
       axis: {
-        domainColor: "#e4e4e7",
-        gridColor: "#f4f4f5",
+        domainColor: c.domain,
+        gridColor: c.grid,
         gridDash: [3, 3],
-        tickColor: "#e4e4e7",
-        labelColor: "#71717a",
-        titleColor: "#18181b",
+        tickColor: c.domain,
+        labelColor: c.label,
+        titleColor: c.title,
         labelFont: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         titleFont: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         labelFontSize: 11,
@@ -145,8 +165,8 @@
         titleFontWeight: 500,
       },
       legend: {
-        labelColor: "#27272a",
-        titleColor: "#09090b",
+        labelColor: c.label2,
+        titleColor: c.title2,
         labelFont: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         titleFont: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         labelFontSize: 11,
@@ -299,7 +319,11 @@
     });
     themeObserver.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ["class", "data-theme"],
+      attributeFilter: PAGE_THEME_ATTRIBUTES,
+    });
+    themeObserver.observe(document.body, {
+      attributes: true,
+      attributeFilter: PAGE_THEME_ATTRIBUTES,
     });
 
     // Observe size on parent card wrapper with debounce and threshold to prevent feedback loops
@@ -546,12 +570,12 @@
     position: relative;
     margin: 16px 0;
     padding: 20px 24px 14px 24px;
-    background: var(--bds-bg-panel, #ffffff);
-    border: 1px solid var(--bds-border, #e5e7eb);
+    background: var(--bds-bg-panel, var(--bds-surface));
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    color: var(--bds-text-primary, #111827);
+    color: var(--bds-text-primary, var(--bds-text-primary));
     transition: box-shadow 0.2s ease, border-color 0.2s ease;
     overflow: hidden;
   }
@@ -561,9 +585,9 @@
   :global(body.dark) .bds-chart-card,
   .bds-chart-card.dark {
     background: #111113;
-    border: 1px solid #27272a;
+    border: 1px solid var(--bds-surface-raised);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
-    color: #f4f4f5;
+    color: var(--bds-surface-subtle);
   }
 
   /* Header */
@@ -593,13 +617,13 @@
     margin: 4px 0 0 0;
     font-size: 0.85rem;
     line-height: 1.45;
-    color: var(--bds-text-secondary, #6b7280);
+    color: var(--bds-text-secondary, var(--bds-text-secondary));
   }
 
   :global(html.dark) .bds-chart-subtitle,
   :global(body.dark) .bds-chart-subtitle,
   .bds-chart-card.dark .bds-chart-subtitle {
-    color: #a1a1aa;
+    color: var(--bds-text-tertiary);
   }
 
   /* Header Actions */
@@ -624,32 +648,32 @@
     background: transparent;
     border: 1px solid transparent;
     border-radius: 8px;
-    color: var(--bds-text-secondary, #6b7280);
+    color: var(--bds-text-secondary, var(--bds-text-secondary));
     cursor: pointer;
     transition: all 0.15s ease;
   }
 
   .bds-chart-btn:hover {
     background: var(--bds-bg-hover, rgba(0, 0, 0, 0.05));
-    color: var(--bds-text-primary, #111827);
+    color: var(--bds-text-primary, var(--bds-text-primary));
   }
 
   .bds-chart-btn.active {
     background: var(--bds-accent-glow, rgba(77, 107, 254, 0.12));
-    color: var(--bds-accent, #4d6bfe);
+    color: var(--bds-accent, var(--bds-accent));
   }
 
   :global(html.dark) .bds-chart-btn,
   :global(body.dark) .bds-chart-btn,
   .bds-chart-card.dark .bds-chart-btn {
-    color: #a1a1aa;
+    color: var(--bds-text-tertiary);
   }
 
   :global(html.dark) .bds-chart-btn:hover,
   :global(body.dark) .bds-chart-btn:hover,
   .bds-chart-card.dark .bds-chart-btn:hover {
-    background: #27272a;
-    color: #f4f4f5;
+    background: var(--bds-surface-raised);
+    color: var(--bds-surface-subtle);
   }
 
   /* Download Dropdown Menu */
@@ -665,8 +689,8 @@
     right: 0;
     z-index: 100;
     min-width: 210px;
-    background: var(--bds-bg-panel, #ffffff);
-    border: 1px solid var(--bds-border, #e5e7eb);
+    background: var(--bds-bg-panel, var(--bds-surface));
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 10px;
     padding: 6px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
@@ -679,8 +703,8 @@
   :global(html.dark) .bds-chart-menu,
   :global(body.dark) .bds-chart-menu,
   .bds-chart-card.dark .bds-chart-menu {
-    background: #1e1f23;
-    border-color: #3f3f46;
+    background: var(--bds-surface);
+    border-color: var(--bds-border-strong);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
   }
 
@@ -719,7 +743,7 @@
   .bds-chart-code-drawer {
     margin-bottom: 16px;
     background: #09090b;
-    border: 1px solid #27272a;
+    border: 1px solid var(--bds-surface-raised);
     border-radius: 10px;
     overflow: hidden;
   }
@@ -730,7 +754,7 @@
     justify-content: space-between;
     padding: 8px 12px;
     background: #141416;
-    border-bottom: 1px solid #27272a;
+    border-bottom: 1px solid var(--bds-surface-raised);
   }
 
   .bds-chart-code-label {
@@ -738,7 +762,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #71717a;
+    color: var(--bds-text-secondary);
   }
 
   .bds-chart-copy-btn {
@@ -747,17 +771,17 @@
     gap: 6px;
     padding: 4px 8px;
     background: transparent;
-    border: 1px solid #27272a;
+    border: 1px solid var(--bds-surface-raised);
     border-radius: 6px;
     font-size: 11px;
-    color: #a1a1aa;
+    color: var(--bds-text-tertiary);
     cursor: pointer;
     transition: all 0.15s ease;
   }
 
   .bds-chart-copy-btn:hover {
-    background: #27272a;
-    color: #f4f4f5;
+    background: var(--bds-surface-raised);
+    color: var(--bds-surface-subtle);
   }
 
   .bds-chart-code-content {
@@ -768,7 +792,7 @@
     font-family: "JetBrains Mono", Consolas, Monaco, "Courier New", monospace;
     font-size: 12px;
     line-height: 1.5;
-    color: #e4e4e7;
+    color: var(--bds-border);
     background: transparent;
   }
 
@@ -822,11 +846,11 @@
     align-items: flex-start;
     gap: 12px;
     padding: 14px 16px;
-    background: rgba(239, 68, 68, 0.08);
-    border: 1px solid rgba(239, 68, 68, 0.25);
+    background: var(--bds-danger-soft);
+    border: 1px solid var(--bds-danger-soft);
     border-radius: 10px;
     font-size: 13px;
-    color: #ef4444;
+    color: var(--bds-danger);
   }
 
   .bds-chart-error-icon {
@@ -857,33 +881,33 @@
     height: 28px;
     padding: 0;
     background: var(--bds-bg-elevated, rgba(0, 0, 0, 0.03));
-    border: 1px solid var(--bds-border, #e5e7eb);
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 50%;
-    color: var(--bds-text-secondary, #6b7280);
+    color: var(--bds-text-secondary, var(--bds-text-secondary));
     cursor: pointer;
     transition: all 0.15s ease;
   }
 
   .bds-chart-expand-btn:hover {
     background: var(--bds-bg-hover, rgba(0, 0, 0, 0.08));
-    color: var(--bds-text-primary, #111827);
-    border-color: var(--bds-border-hover, #d1d5db);
+    color: var(--bds-text-primary, var(--bds-text-primary));
+    border-color: var(--bds-border-hover, var(--bds-border-strong));
   }
 
   :global(html.dark) .bds-chart-expand-btn,
   :global(body.dark) .bds-chart-expand-btn,
   .bds-chart-card.dark .bds-chart-expand-btn {
-    background: #18181b;
-    border-color: #27272a;
-    color: #a1a1aa;
+    background: var(--bds-text-primary);
+    border-color: var(--bds-surface-raised);
+    color: var(--bds-text-tertiary);
   }
 
   :global(html.dark) .bds-chart-expand-btn:hover,
   :global(body.dark) .bds-chart-expand-btn:hover,
   .bds-chart-card.dark .bds-chart-expand-btn:hover {
-    background: #27272a;
-    color: #f4f4f5;
-    border-color: #3f3f46;
+    background: var(--bds-surface-raised);
+    color: var(--bds-surface-subtle);
+    border-color: var(--bds-border-strong);
   }
 
   /* ── Sleek Vega Tooltip Customization Matching Image 4 ── */
@@ -892,9 +916,9 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     font-size: 12px !important;
     border-radius: 8px !important;
-    border: 1px solid #3f3f46 !important;
-    background-color: #18181b !important;
-    color: #f4f4f5 !important;
+    border: 1px solid var(--bds-border-strong) !important;
+    background-color: var(--bds-text-primary) !important;
+    color: var(--bds-surface-subtle) !important;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
     z-index: 100000 !important;
   }
@@ -904,14 +928,14 @@
   }
 
   :global(#vg-tooltip-element.vg-tooltip td.key) {
-    color: #a1a1aa !important;
+    color: var(--bds-text-tertiary) !important;
     font-weight: 500 !important;
     padding-right: 10px !important;
     padding-bottom: 2px !important;
   }
 
   :global(#vg-tooltip-element.vg-tooltip td.value) {
-    color: #f4f4f5 !important;
+    color: var(--bds-surface-subtle) !important;
     font-weight: 600 !important;
     padding-bottom: 2px !important;
   }

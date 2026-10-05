@@ -266,7 +266,7 @@
 
   .bds-rag-count {
     background: var(--bds-accent, #4f9bff);
-    color: #fff;
+    color: var(--bds-surface);
     font-size: 9px;
     font-weight: 700;
     padding: 1px 6px;

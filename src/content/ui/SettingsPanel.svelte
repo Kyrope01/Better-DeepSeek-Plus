@@ -19,7 +19,7 @@
   import SnippetList from "./SnippetList.svelte";
   import { collapseAllOpenReasoningBlocks, expandAllCollapsedReasoningBlocks } from "../message-processor.svelte.js";
 
-  let { onapiplayground, onimportdata, onsave } = $props();
+  let { onapiplayground, onimportdata, onsave, sectionFilter = null } = $props();
 
   let customSystemPrompts = $state(appState.settings.customSystemPrompts || []);
   let activeSystemPromptId = $state(appState.settings.activeSystemPromptId || "default");
@@ -868,6 +868,9 @@
   });
 
   function isSectionMatch(sectionKey) {
+    // `sectionFilter` lets a host (DeepSeek's own Settings dialog) show one
+    // category at a time; without it every section renders, as in the drawer.
+    if (sectionFilter && !sectionFilter.includes(sectionKey)) return false;
     if (!searchActive) return true;
     return filteredSearchSections?.some(s => s.sectionKey === sectionKey) ?? false;
   }
@@ -957,7 +960,11 @@
     if (!snippet) return;
     editingSnippetId = snippet.id;
     customCSS = snippet.css;
-    const textarea = document.querySelector(".bds-css-editor");
+    // The panel can be mounted twice (drawer + DeepSeek's Settings dialog), so
+    // prefer the copy the user is actually looking at.
+    const editors = [...document.querySelectorAll(".bds-css-editor")];
+    const textarea =
+      editors.find((el) => el.getBoundingClientRect().width > 0) || editors[0];
     if (textarea) {
       textarea.focus();
       textarea.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1657,7 +1664,7 @@
           <span class="bds-prompt-status">{scheduleLabel(entry)}</span>
         </div>
         <div class="bds-prompt-actions">
-          <button class="bds-btn-outlined" style="font-size: 11px; padding: 4px 8px;" title={t('settings.edit')} onclick={() => openMultiEntryEditor(entry)}>
+          <button class="bds-btn-outlined bds-btn-xs" title={t('settings.edit')} onclick={() => openMultiEntryEditor(entry)}>
             {t('settings.edit')}
           </button>
           <button class="bds-btn-danger" title={t('settings.delete')} onclick={() => deleteMultiEntry(entry.id)}>
@@ -1683,7 +1690,7 @@
         </div>
       </label>
       <div class="bds-prompt-actions">
-        <button class="bds-btn-outlined" style="font-size: 11px; padding: 4px 8px;" title={t('settings.view')} onclick={() => openPromptEditor({ id: 'default', name: t('settings.defaultPromptName'), content: appState.settings.systemPrompt || DEFAULT_SYSTEM_PROMPT, readonly: true })}>
+        <button class="bds-btn-outlined bds-btn-xs" title={t('settings.view')} onclick={() => openPromptEditor({ id: 'default', name: t('settings.defaultPromptName'), content: appState.settings.systemPrompt || DEFAULT_SYSTEM_PROMPT, readonly: true })}>
           {t('settings.view')}
         </button>
       </div>
@@ -1699,7 +1706,7 @@
           </div>
         </label>
         <div class="bds-prompt-actions">
-          <button class="bds-btn-outlined" style="font-size: 11px; padding: 4px 8px;" title={t('settings.edit')} onclick={() => openPromptEditor(prompt)}>
+          <button class="bds-btn-outlined bds-btn-xs" title={t('settings.edit')} onclick={() => openPromptEditor(prompt)}>
             {t('settings.edit')}
           </button>
           <button class="bds-btn-danger" title={t('settings.delete')} onclick={() => deletePrompt(prompt.id)}>
@@ -2449,10 +2456,10 @@
               <span class="bds-prompt-status">{server.serverUrl} · {t('mcp.toolsCount', { count: server.tools?.length || 0 })}</span>
             </div>
             <div class="bds-prompt-actions">
-              <button class="bds-btn-outlined" style="font-size: 11px; padding: 4px 8px;" onclick={() => testMcpServer(i)} disabled={mcpTestingIndex === i}>
+              <button class="bds-btn-outlined bds-btn-xs" onclick={() => testMcpServer(i)} disabled={mcpTestingIndex === i}>
                 {mcpTestingIndex === i ? t('mcp.testLoading') : t('mcp.test')}
               </button>
-              <button class="bds-btn-outlined" style="font-size: 11px; padding: 4px 8px;" onclick={() => openMcpEditor(server)}>{t('mcp.edit')}</button>
+              <button class="bds-btn-outlined bds-btn-xs" onclick={() => openMcpEditor(server)}>{t('mcp.edit')}</button>
               <button class="bds-btn-danger" onclick={() => deleteMcpServer(server.id)}>×</button>
             </div>
           </div>
@@ -2698,8 +2705,7 @@
             </select>
             <button
               type="button"
-              class="bds-btn-outlined"
-              style="font-size: 11px; padding: 4px 8px; white-space: nowrap;"
+              class="bds-btn-outlined bds-btn-xs"
               onclick={fetchMcpEditorTools}
               disabled={mcpEditorFetching || !mcpEditorUrl.trim()}
             >
@@ -2793,7 +2799,7 @@
 
   .bds-snippets-badge {
     background: var(--bds-accent);
-    color: #ffffff;
+    color: var(--bds-surface);
     font-size: 10px;
     padding: 1px 6px;
     border-radius: 10px;
@@ -2839,8 +2845,8 @@
   }
 
   .bds-lang-reset-btn {
-    border-color: rgba(239, 68, 68, 0.3);
-    color: rgba(239, 68, 68, 0.8);
+    border-color: var(--bds-danger-soft);
+    color: var(--bds-danger-soft);
   }
 
   .bds-token-field {
@@ -3206,8 +3212,8 @@
     letter-spacing: 0.03em;
     padding: 1px 5px;
     border-radius: 4px;
-    background: var(--bds-accent, #4d6bfe);
-    color: #fff;
+    background: var(--bds-accent, var(--bds-accent));
+    color: var(--bds-surface);
     opacity: 0.85;
   }
 
@@ -3231,7 +3237,7 @@
 
   .bds-search-provider-move:hover:not(:disabled) {
     background: var(--bds-accent);
-    color: #fff;
+    color: var(--bds-surface);
     border-color: var(--bds-accent);
   }
 

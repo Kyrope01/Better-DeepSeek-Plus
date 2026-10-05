@@ -19,6 +19,7 @@ import state from "../state.js";
  * @property {(title: string, content: string) => void} showPreviewPanel
  * @property {() => void} hidePreviewPanel
  * @property {(visible: boolean) => void} showLongWorkOverlay
+ * @property {() => void} openDrawer
  */
 
 /**
@@ -60,9 +61,20 @@ export function mountUi() {
     showLongWorkOverlay: (visible) => app.showLongWorkOverlay(visible),
     openLiveMode: () => app.openLiveMode(),
     closeLiveMode: () => app.closeLiveMode(),
+    openDrawer: () => app.openDrawer(),
   };
 
   state.ui = api;
+
+  // Small, stable handle for tests and power users. The floating corner button is
+  // opt-in now, so specs (and anyone scripting the extension) need a way to open
+  // the drawer and reach the same API the button used to provide.
+  try {
+    window.__BDS_UI__ = api;
+  } catch (_) {
+    // non-window context
+  }
+
   initPreviewAvoidance(root);
   return api;
 }

@@ -18,7 +18,7 @@
 
 <style>
   .bds-tool-card {
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--bds-border-strong);
     border-radius: 8px;
     background: transparent;
     padding: 12px;

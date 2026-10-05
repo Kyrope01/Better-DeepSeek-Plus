@@ -137,12 +137,12 @@
 
 <style>
   .bds-todo-card {
-    --todo-card-bg: #ffffff;
-    --todo-card-border: #e5e7eb;
-    --todo-card-title: #1f2937;
-    --todo-card-text: #4b5563;
-    --todo-accent: #3b82f6;
-    --todo-btn-hover: #f3f4f6;
+    --todo-card-bg: var(--bds-surface);
+    --todo-card-border: var(--bds-border);
+    --todo-card-title: var(--bds-text-primary);
+    --todo-card-text: var(--bds-text-secondary);
+    --todo-accent: var(--bds-accent);
+    --todo-btn-hover: var(--bds-surface-subtle);
 
     background-color: var(--todo-card-bg);
     border: 1px solid var(--todo-card-border);
@@ -155,12 +155,14 @@
   }
 
   /* Dark Theme Overrides */
-  :global(.dark) .bds-todo-card {
-    --todo-card-bg: var(--bds-bg-panel, #1e1f23);
-    --todo-card-border: var(--bds-border, #3a3b3f);
-    --todo-card-title: var(--bds-text-primary, #ececec);
+  :global(body[data-ds-dark-theme]) .bds-todo-card,
+  :global(body.dark) .bds-todo-card,
+  :global(html.dark) .bds-todo-card {
+    --todo-card-bg: var(--bds-bg-panel, var(--bds-surface));
+    --todo-card-border: var(--bds-border, var(--bds-border));
+    --todo-card-title: var(--bds-text-primary, var(--bds-surface-subtle));
     --todo-card-text: var(--bds-text-secondary, #b4b4c3);
-    --todo-accent: var(--bds-accent, #5b7bff);
+    --todo-accent: var(--bds-accent, var(--bds-accent));
     --todo-btn-hover: var(--bds-bg-hover, rgba(255, 255, 255, 0.08));
   }
 
@@ -222,7 +224,7 @@
   .copied-text {
     font-size: 11px;
     font-weight: 600;
-    color: #10b981;
+    color: var(--bds-success);
     padding: 0 4px;
     white-space: nowrap;
   }

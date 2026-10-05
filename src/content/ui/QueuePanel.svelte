@@ -222,8 +222,8 @@
     position: relative;
     z-index: 99999;
     pointer-events: auto !important;
-    background: var(--bds-bg-panel, #1e1f23);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    background: var(--bds-bg-panel, var(--bds-surface));
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 14px;
     padding: 16px;
     box-sizing: border-box;
@@ -251,7 +251,7 @@
     margin: 0;
     font-size: 15px;
     font-weight: 600;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     line-height: 1.4;
   }
 
@@ -266,13 +266,13 @@
     align-items: center;
     gap: 8px;
     font-size: 12px;
-    color: var(--bds-text-secondary, #8e8ea0);
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
   }
 
   .bds-close-btn {
     background: none;
     border: none;
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
     font-size: 20px;
     cursor: pointer;
     padding: 0 4px;
@@ -281,7 +281,7 @@
   }
 
   .bds-close-btn:hover {
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
   }
 
   .bds-question-body {
@@ -292,8 +292,8 @@
   .bds-options-list {
     display: flex;
     flex-direction: column;
-    background: var(--bds-bg-elevated, #2a2b30);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: var(--bds-radius, 14px);
     overflow-y: auto;
     max-height: 280px;
@@ -306,8 +306,8 @@
     padding: 12px 16px;
     background: transparent;
     border: none;
-    border-bottom: 1px solid var(--bds-border, #3a3b3f);
-    color: var(--bds-text-primary, #ececec);
+    border-bottom: 1px solid var(--bds-border, var(--bds-border));
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     font-size: 14px;
     text-align: left;
     transition: all 0.2s;
@@ -325,7 +325,7 @@
 
   .bds-option-index {
     background: var(--bds-bg-hover, rgba(255, 255, 255, 0.08));
-    color: var(--bds-text-secondary, #8e8ea0);
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -360,7 +360,7 @@
   .bds-tool-btn {
     background: transparent;
     border: none;
-    color: var(--bds-text-secondary, #8e8ea0);
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
     cursor: pointer;
     font-size: 12px;
     padding: 2px 6px;
@@ -370,12 +370,12 @@
 
   .bds-tool-btn:hover {
     background: var(--bds-bg-hover, rgba(255, 255, 255, 0.12));
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
   }
 
   .bds-tool-btn.danger:hover {
-    color: #f87171;
-    background: rgba(239, 68, 68, 0.15);
+    color: var(--bds-danger);
+    background: var(--bds-danger-soft);
   }
 
   /* Footer */
@@ -383,7 +383,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top: 1px solid var(--bds-border, #3a3b3f);
+    border-top: 1px solid var(--bds-border, var(--bds-border));
     padding-top: 12px;
   }
 
@@ -391,7 +391,7 @@
     display: flex;
     gap: 12px;
     font-size: 11px;
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
   }
 
   .bds-footer-actions {
@@ -401,8 +401,8 @@
 
   .bds-action-btn {
     background: var(--bds-bg-hover, rgba(255, 255, 255, 0.08));
-    color: var(--bds-text-primary, #ececec);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
+    border: 1px solid var(--bds-border, var(--bds-border));
     padding: 6px 16px;
     border-radius: 8px;
     font-size: 13px;
@@ -416,9 +416,9 @@
   }
 
   .bds-action-btn.bds-submit-btn {
-    background: var(--bds-accent, #5b7bff);
-    color: #fff;
-    border-color: var(--bds-accent, #5b7bff);
+    background: var(--bds-accent, var(--bds-accent));
+    color: var(--bds-surface);
+    border-color: var(--bds-accent, var(--bds-accent));
   }
 
   .bds-action-btn.bds-submit-btn:hover {

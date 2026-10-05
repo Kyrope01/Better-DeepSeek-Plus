@@ -297,7 +297,7 @@
     background-color: var(--bds-bg-elevated);
     border: 1px solid var(--bds-border);
     border-radius: 8px;
-    color: #8b5cf6;
+    color: var(--bds-accent);
     flex-shrink: 0;
   }
 
@@ -320,7 +320,7 @@
   .bds-mcp-badge {
     display: inline-block;
     background: rgba(139, 92, 246, 0.15);
-    color: #a78bfa;
+    color: var(--bds-accent);
     padding: 1px 6px;
     border-radius: 4px;
     font-size: 10px;
@@ -328,13 +328,13 @@
   }
 
   .bds-mcp-badge--csv {
-    background: rgba(16, 185, 129, 0.15);
-    color: #34d399;
+    background: var(--bds-success-soft);
+    color: var(--bds-success);
   }
 
   .bds-mcp-badge--json {
-    background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
+    background: var(--bds-warning-soft);
+    color: var(--bds-warning);
   }
 
   .bds-mcp-server {
@@ -434,7 +434,7 @@
 
   .bds-mcp-kv-key {
     font-weight: 600;
-    color: var(--bds-accent, #5b7bff);
+    color: var(--bds-accent, var(--bds-accent));
     min-width: 120px;
     flex-shrink: 0;
     font-family: monospace;
@@ -485,7 +485,7 @@
     display: block;
     font-size: 12.5px;
     font-weight: 600;
-    color: var(--bds-accent, #5b7bff);
+    color: var(--bds-accent, var(--bds-accent));
     text-decoration: none;
     line-height: 1.4;
     margin-bottom: 2px;
@@ -525,7 +525,7 @@
     gap: 4px;
     background: transparent;
     border: none;
-    color: var(--bds-accent, #5b7bff);
+    color: var(--bds-accent, var(--bds-accent));
     font-size: 10.5px;
     font-weight: 600;
     cursor: pointer;

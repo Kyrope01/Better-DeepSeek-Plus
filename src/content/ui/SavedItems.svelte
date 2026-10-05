@@ -189,8 +189,8 @@
       {t('savedItems.title')}
     </div>
     <div style="display: flex; gap: 6px;">
-      <button type="button" class="bds-btn-outlined" style="font-size:11px;padding:4px 8px;" onclick={exportAll}>{t('savedItems.export')}</button>
-      <button type="button" class="bds-btn-outlined" style="font-size:11px;padding:4px 8px;" onclick={triggerImport}>{t('savedItems.import')}</button>
+      <button type="button" class="bds-btn-outlined bds-btn-xs" onclick={exportAll}>{t('savedItems.export')}</button>
+      <button type="button" class="bds-btn-outlined bds-btn-xs" onclick={triggerImport}>{t('savedItems.import')}</button>
     </div>
   </div>
 </div>

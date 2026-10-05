@@ -158,9 +158,9 @@
     width: 100%;
     max-width: 100%;
     min-width: 0;
-    border: 1px solid var(--bds-border, #3a3b3f);
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 12px;
-    background: var(--bds-bg-panel, #1e1f23);
+    background: var(--bds-bg-panel, var(--bds-surface));
     overflow: hidden;
     font-family: inherit;
     transition: border-color 0.2s ease;
@@ -171,7 +171,7 @@
   }
 
   .bds-file-error {
-    border-left: 3px solid #ef4444;
+    border-left: 3px solid var(--bds-danger);
   }
 
   .bds-file-header {
@@ -200,14 +200,14 @@
     background: rgba(59, 130, 246, 0.1);
     border: 1px solid rgba(59, 130, 246, 0.25);
     border-radius: 8px;
-    color: #3b82f6;
+    color: var(--bds-accent);
     flex-shrink: 0;
   }
 
   .bds-file-icon-error {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.25);
-    color: #ef4444;
+    background: var(--bds-danger-soft);
+    border-color: var(--bds-danger-soft);
+    color: var(--bds-danger);
   }
 
   .bds-file-details {
@@ -226,7 +226,7 @@
     margin: 0;
     font-size: 13.5px;
     font-weight: 600;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -236,9 +236,9 @@
   .bds-lines-badge {
     font-size: 10px;
     font-weight: 500;
-    background: var(--bds-bg-elevated, #2a2b30);
-    color: var(--bds-text-secondary, #8e8ea0);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
+    border: 1px solid var(--bds-border, var(--bds-border));
     padding: 1px 6px;
     border-radius: 4px;
     flex-shrink: 0;
@@ -247,7 +247,7 @@
   .bds-file-path {
     margin: 2px 0 0;
     font-size: 11px;
-    color: var(--bds-text-tertiary, #6b6b7b);
+    color: var(--bds-text-tertiary, var(--bds-text-tertiary));
     font-family: monospace;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -257,7 +257,7 @@
   .bds-file-error-msg {
     margin: 2px 0 0;
     font-size: 11px;
-    color: #ef4444;
+    color: var(--bds-danger);
   }
 
   .bds-file-actions {
@@ -271,10 +271,10 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    background: var(--bds-bg-elevated, #2a2b30);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 6px;
-    color: var(--bds-text-secondary, #8e8ea0);
+    color: var(--bds-text-secondary, var(--bds-text-tertiary));
     font-size: 11.5px;
     font-weight: 500;
     padding: 5px 9px;
@@ -284,14 +284,14 @@
 
   .bds-btn-action:hover {
     background: var(--bds-bg-hover, rgba(255, 255, 255, 0.08));
-    color: var(--bds-text-primary, #ececec);
-    border-color: var(--bds-accent, #4d6bfe);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
+    border-color: var(--bds-accent, var(--bds-accent));
   }
 
   .bds-btn-toggle {
     background: transparent;
     border: none;
-    color: var(--bds-accent, #4d6bfe);
+    color: var(--bds-accent, var(--bds-accent));
     font-size: 11.5px;
     font-weight: 600;
     cursor: pointer;
@@ -305,7 +305,7 @@
   }
 
   .bds-file-body {
-    border-top: 1px solid var(--bds-border, #3a3b3f);
+    border-top: 1px solid var(--bds-border, var(--bds-border));
     background: rgba(0, 0, 0, 0.15);
     padding: 10px 14px 14px;
   }
@@ -315,14 +315,14 @@
     max-height: 320px;
     overflow-y: auto;
     overflow-x: auto;
-    background: var(--bds-bg-elevated, #2a2b30);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 8px;
     padding: 12px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 12px;
     line-height: 1.5;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     white-space: pre;
     tab-size: 2;
   }

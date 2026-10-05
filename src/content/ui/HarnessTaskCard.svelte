@@ -561,12 +561,12 @@
     color: var(--bds-accent);
   }
   .bds-harness-badge.bds-success {
-    background: rgba(16, 185, 129, 0.14);
-    color: #10b981;
+    background: var(--bds-success-soft);
+    color: var(--bds-success);
   }
   .bds-harness-badge.bds-fallback {
-    background: rgba(245, 158, 11, 0.14);
-    color: #f59e0b;
+    background: var(--bds-warning-soft);
+    color: var(--bds-warning);
   }
   .bds-harness-badge.bds-error {
     background: var(--bds-danger-border);
@@ -628,8 +628,8 @@
     font-family: monospace;
   }
   .bds-fallback-card {
-    background: rgba(245, 158, 11, 0.08);
-    border: 1px solid rgba(245, 158, 11, 0.3);
+    background: var(--bds-warning-soft);
+    border: 1px solid var(--bds-warning-soft);
     border-radius: var(--bds-radius);
     padding: 12px;
     /* Never let the manual-run section push the card past the viewport. */
@@ -642,7 +642,7 @@
     gap: 6px;
     font-size: 12px;
     font-weight: 600;
-    color: #f59e0b;
+    color: var(--bds-warning);
     margin-bottom: 6px;
   }
   .bds-fallback-title svg {
@@ -669,7 +669,7 @@
   }
   .bds-feedback-text {
     font-size: 11px;
-    color: #10b981;
+    color: var(--bds-success);
   }
   .bds-fallback-hint {
     display: flex;
@@ -767,12 +767,12 @@
     border-left: 2px solid transparent;
   }
   .bds-live-log-item.tool-call {
-    color: #f59e0b;
-    border-left: 2px solid #f59e0b;
+    color: var(--bds-warning);
+    border-left: 2px solid var(--bds-warning);
   }
   .bds-live-log-item.tool-result {
-    color: #10b981;
-    border-left: 2px solid #10b981;
+    color: var(--bds-success);
+    border-left: 2px solid var(--bds-success);
   }
   .bds-assistant-output {
     margin-top: 10px;
@@ -799,16 +799,16 @@
   }
   .bds-final-report-card {
     background: var(--bds-bg-elevated);
-    border: 1px solid rgba(16, 185, 129, 0.35);
+    border: 1px solid var(--bds-success-soft);
     border-radius: var(--bds-radius);
     padding: 14px;
-    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.12);
+    box-shadow: 0 4px 20px var(--bds-success-soft);
   }
   .bds-auto-inject-notice {
     margin-top: 10px;
     padding: 8px 10px;
-    background: rgba(16, 185, 129, 0.08);
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: var(--bds-success-soft);
+    border: 1px solid var(--bds-success-soft);
     border-radius: 8px;
     font-size: 11px;
     color: var(--bds-text-secondary);
@@ -819,14 +819,14 @@
   }
   .bds-auto-inject-notice svg {
     flex-shrink: 0;
-    color: #10b981;
+    color: var(--bds-success);
   }
   .bds-auto-inject-notice code {
     background: var(--bds-bg-input);
     border: 1px solid var(--bds-border);
     padding: 1px 4px;
     border-radius: 4px;
-    color: #10b981;
+    color: var(--bds-success);
     font-size: 10px;
     font-family: monospace;
   }
@@ -837,14 +837,14 @@
     gap: 8px;
     margin-bottom: 10px;
     padding-bottom: 8px;
-    border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+    border-bottom: 1px solid var(--bds-success-soft);
     flex-wrap: wrap;
   }
   .bds-final-report-title {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #10b981;
+    color: var(--bds-success);
     font-size: 13px;
   }
   .bds-report-actions {
@@ -861,7 +861,7 @@
   }
   .bds-copy-feedback {
     font-size: 11px;
-    color: #10b981;
+    color: var(--bds-success);
   }
   .bds-report-pre {
     background: var(--bds-bg-input);
@@ -879,7 +879,7 @@
     font-family: monospace;
   }
   .bds-harness-error-container {
-    background: rgba(239, 68, 68, 0.08);
+    background: var(--bds-danger-soft);
     border: 1px solid var(--bds-danger-border);
     border-radius: var(--bds-radius);
     padding: 10px 12px;
@@ -944,7 +944,7 @@
     border-color: var(--bds-danger-border);
   }
   .bds-btn-cancel:hover {
-    background: rgba(239, 68, 68, 0.1);
+    background: var(--bds-danger-soft);
     border-color: var(--bds-danger);
   }
   .bds-btn-run {

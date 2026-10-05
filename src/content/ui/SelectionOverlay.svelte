@@ -259,7 +259,7 @@
 
   .bds-selection-label {
     font-size: 13px;
-    color: #999;
+    color: var(--bds-text-tertiary);
   }
 
   .bds-export-group {
@@ -268,13 +268,13 @@
     border-radius: 12px;
     padding: 3px;
     gap: 2px;
-    border: 1px solid #333;
+    border: 1px solid var(--bds-text-primary);
   }
 
   .bds-export-btn {
     background: transparent;
     border: none;
-    color: #aaa;
+    color: var(--bds-text-quaternary);
     padding: 6px 12px;
     border-radius: 9px;
     font-size: 11px;
@@ -284,14 +284,14 @@
   }
 
   .bds-export-btn:hover {
-    background: #333;
+    background: var(--bds-text-primary);
     color: white;
   }
 
   .bds-btn-ghost {
     background: transparent;
-    border: 1px solid #333;
-    color: #ccc;
+    border: 1px solid var(--bds-text-primary);
+    color: var(--bds-border-strong);
     padding: 6px 16px;
     border-radius: 20px;
     font-size: 12px;
@@ -302,7 +302,7 @@
   }
 
   .bds-btn-ghost:hover {
-    border-color: #555;
+    border-color: var(--bds-text-secondary);
     background: rgba(255, 255, 255, 0.05);
     color: white;
   }

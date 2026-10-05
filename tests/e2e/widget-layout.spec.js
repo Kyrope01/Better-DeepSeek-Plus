@@ -5,28 +5,10 @@
  */
 import { test, expect } from "./helpers/extension.js";
 
-test("toggle is visible in the top-right area on desktop", async ({ page }) => {
-  const box = await page.locator("#bds-toggle").boundingBox();
-  const vp = page.viewportSize();
-  expect(box).not.toBeNull();
-  expect(box.x).toBeGreaterThan(vp.width / 2);
-  expect(box.y).toBeLessThan(200);
-});
-
-test("toggle shows full BDS label and hides short label on desktop", async ({ page }) => {
-  const { fullDisplay, shortDisplay } = await page.evaluate(() => ({
-    fullDisplay: getComputedStyle(document.querySelector("#bds-toggle .bds-toggle-full")).display,
-    shortDisplay: getComputedStyle(document.querySelector("#bds-toggle .bds-toggle-short")).display,
-  }));
-  expect(fullDisplay).not.toBe("none");
-  expect(shortDisplay).toBe("none");
-});
-
-test("toggle is fully opaque on desktop", async ({ page }) => {
-  const opacity = await page.evaluate(() =>
-    parseFloat(getComputedStyle(document.querySelector("#bds-toggle")).opacity),
-  );
-  expect(opacity).toBe(1);
+test("does not render the floating corner button by default", async ({ page }) => {
+  // The extension's settings live in DeepSeek's own Settings dialog; the corner
+  // button is opt-in (settings.floatingButton === "always").
+  await expect(page.locator("#bds-toggle")).toHaveCount(0);
 });
 
 test("bds-root is not full-width on desktop", async ({ page }) => {
@@ -46,7 +28,7 @@ test("bds-root uses fixed top-right positioning on desktop", async ({ page }) =>
 });
 
 test("drawer is right-anchored when opened on desktop", async ({ page }) => {
-  await page.locator("#bds-toggle").click();
+  await page.evaluate(() => window.__BDS_UI__.openDrawer());
   await expect(page.locator("#bds-drawer")).toHaveClass(/bds-open/);
 
   const drawerBox = await page.locator("#bds-drawer").boundingBox();
@@ -55,6 +37,7 @@ test("drawer is right-anchored when opened on desktop", async ({ page }) => {
   expect(drawerBox.x).toBeGreaterThan(vp.width / 2);
 });
 
-test("toggle carries correct aria-label on desktop", async ({ page }) => {
-  await expect(page.locator("#bds-toggle")).toHaveAttribute("aria-label", "Better DeepSeek");
+test("exposes the UI API the corner button used to provide", async ({ page }) => {
+  const hasApi = await page.evaluate(() => typeof window.__BDS_UI__?.openDrawer === "function");
+  expect(hasApi).toBe(true);
 });

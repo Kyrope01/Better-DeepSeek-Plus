@@ -1561,14 +1561,14 @@
   }
 
   .bds-mic-btn.bds-recording {
-    color: #ef4444;
-    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--bds-danger);
+    background-color: var(--bds-danger-soft);
   }
 
   .bds-recording-pulse {
     position: absolute;
     inset: -2px;
-    border: 2px solid #ef4444;
+    border: 2px solid var(--bds-danger);
     border-radius: 50%;
     animation: bds-pulse 1.5s infinite;
     opacity: 0;
@@ -1754,7 +1754,7 @@
   }
 
   .bds-github-error {
-    color: var(--bds-danger, #f87171);
+    color: var(--bds-danger, var(--bds-danger));
     font-size: 13px;
     padding: 0 2px;
   }
@@ -1868,7 +1868,7 @@
   .bds-github-btn-import {
     border: none;
     background: var(--bds-accent);
-    color: #fff;
+    color: var(--bds-surface);
   }
 
   .bds-github-btn-import:hover:not(:disabled) {
@@ -2127,7 +2127,7 @@
     gap: 5px;
     padding: 7px 12px;
     background: var(--bds-accent);
-    color: #fff;
+    color: var(--bds-surface);
     border: none;
     border-radius: 8px;
     font-size: 13px;

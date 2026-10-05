@@ -66,10 +66,10 @@
 <style>
   .bds-deep-research-step-done-card {
     margin: 8px 0;
-    border: 1px solid var(--bds-border, #3a3b3f);
+    border: 1px solid var(--bds-border, var(--bds-border));
     border-radius: 12px;
-    background: var(--bds-bg-panel, #1e1f23);
-    color: var(--bds-text-primary, #ececec);
+    background: var(--bds-bg-panel, var(--bds-surface));
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
@@ -86,9 +86,9 @@
     width: 34px;
     height: 34px;
     border-radius: 8px;
-    color: var(--bds-accent, #4f8cff);
-    background: var(--bds-bg-elevated, #25262b);
-    border: 1px solid var(--bds-border, #3a3b3f);
+    color: var(--bds-accent, var(--bds-accent));
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
+    border: 1px solid var(--bds-border, var(--bds-border));
     font-size: 10px;
     font-weight: 700;
     flex-shrink: 0;
@@ -98,7 +98,7 @@
     flex: 1;
     font-size: 13px;
     font-weight: 600;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -110,7 +110,7 @@
     flex-shrink: 0;
   }
   .bds-drsd-body {
-    border-top: 1px solid var(--bds-border, #3a3b3f);
+    border-top: 1px solid var(--bds-border, var(--bds-border));
     padding: 10px 14px 12px;
     display: flex;
     flex-direction: column;
@@ -131,7 +131,7 @@
   .bds-drsd-analysis {
     font-size: 13px;
     line-height: 1.5;
-    color: var(--bds-text-primary, #ececec);
+    color: var(--bds-text-primary, var(--bds-surface-subtle));
     white-space: pre-wrap;
   }
   .bds-drsd-insights {
@@ -153,19 +153,19 @@
     content: "•";
     position: absolute;
     left: 2px;
-    color: var(--bds-accent, #4f8cff);
+    color: var(--bds-accent, var(--bds-accent));
     font-weight: 700;
   }
   .bds-drsd-error {
     padding: 10px 14px 12px;
-    border-top: 1px solid var(--bds-border, #3a3b3f);
-    color: #ef4444;
+    border-top: 1px solid var(--bds-border, var(--bds-border));
+    color: var(--bds-danger);
   }
   .bds-drsd-error-detail,
   .bds-drsd-raw {
     font-size: 11px;
     overflow-x: auto;
-    background: var(--bds-bg-elevated, #25262b);
+    background: var(--bds-bg-elevated, var(--bds-surface-subtle));
     padding: 6px;
     border-radius: 4px;
     max-height: 120px;
@@ -173,7 +173,7 @@
   }
   .bds-drsd-raw {
     margin: 0;
-    border-top: 1px solid var(--bds-border, #3a3b3f);
+    border-top: 1px solid var(--bds-border, var(--bds-border));
     padding: 10px 14px;
   }
   .bds-drsd-empty {
