@@ -218,7 +218,7 @@
       "deepFetchDepth": "عمق واکشی جستجوی وب",
       "deepFetchDepthHint": "مقدار سطوح پیوندهایی که Deep Research هنگام خواندن یک صفحه دنبال می‌کند (۰–۵).",
       "showFloatingButton": "نمایش دکمه شناور BDS",
-"showFloatingButtonHint": "دکمه گوشه را نشان می‌دهد. اگر خاموش کنید، تا زمانی که این تنطیمات در منوی DeepSeek در دسترس است پنهان می‌شود."
+      "showFloatingButtonHint": "دکمه شناور BDS را در گوشه صفحه نشان می‌دهد. به طور پیش‌فرض خاموش است — همه تنطیمات در پنجره تنطیمات DeepSeek موجود است."
     },
     "skillList": {
       "title": "مجموعه مهارت",
@@ -830,8 +830,7 @@
       "tags": "برچسب‌ها (BDS)",
       "exportChat": "خروجی گفتگو (BDS)",
       "getBdsApp": "دریافت برنامه BDS",
-      "whatsNew": "چه چیز جدید است؟",
-      "bdsSettings": "تنطیمات BDS"
+      "whatsNew": "چه چیز جدید است؟"
     },
     "savedItems": {
       "title": "موارد ذخیره‌شده",

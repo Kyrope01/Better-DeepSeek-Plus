@@ -218,7 +218,7 @@
       "deepFetchDepth": "网页抓取深度",
       "deepFetchDepthHint": "深度研究读取网页时跟随链接的层级数（0–5）。",
       "showFloatingButton": "显示悬浮的 BDS 按钮",
-"showFloatingButtonHint": "保留右上角按钮。关闭后，当这些设置可在 DeepSeek 自己的菜单中打开时，按钮会自动隐藏。"
+      "showFloatingButtonHint": "在页面右上角显示悬浮的 BDS 按钮。默认关闭——所有设置均可在 DeepSeek 自己的设置窗口中找到。"
     },
     "skillList": {
       "title": "技能集",
@@ -830,8 +830,7 @@
       "tags": "标签（BDS）",
       "exportChat": "导出聊天（BDS）",
       "getBdsApp": "获取 BDS 应用",
-      "whatsNew": "更新内容",
-      "bdsSettings": "BDS 设置"
+      "whatsNew": "更新内容"
     },
     "savedItems": {
       "title": "已保存项目",

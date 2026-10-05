@@ -44,17 +44,31 @@ vi.mock("../../../src/content/tools/exporter.js", () => exporterMocks);
 vi.mock("../../../src/lib/utils/folder-picker.js", () => folderPickerMocks);
 
 import App from "../../../src/content/ui/App.svelte";
+import appState from "../../../src/content/state.js";
 import { resetAppState } from "../../helpers/app-state.js";
 import { renderSvelte, flushUi } from "../../helpers/svelte.js";
 
-describe("App toggle button", () => {
+/** The extension's settings live in DeepSeek's own dialog; the floating button is
+ *  opt-in. These tests cover both sides of that contract. */
+describe("App floating button + drawer", () => {
   beforeEach(() => {
     resetAppState({ ui: { showToast: vi.fn() } });
     bridgeMocks.pushConfigToPage.mockReset();
     document.body.innerHTML = "";
   });
 
-  it("renders #bds-toggle with aria-label", async () => {
+  it("does not render the floating button by default", async () => {
+    const { target, cleanup } = renderSvelte(App);
+    await flushUi();
+
+    expect(target.querySelector("#bds-toggle")).toBeNull();
+
+    cleanup();
+  });
+
+  it("renders the pinned button with its labels when floatingButton === 'always'", async () => {
+    appState.settings.floatingButton = "always";
+
     const { target, cleanup } = renderSvelte(App);
     await flushUi();
 
@@ -62,24 +76,10 @@ describe("App toggle button", () => {
     expect(toggle).not.toBeNull();
     expect(toggle.getAttribute("aria-label")).toBe("Better DeepSeek");
 
-    cleanup();
-  });
-
-  it("toggle contains .bds-toggle-full span with text BDS", async () => {
-    const { target, cleanup } = renderSvelte(App);
-    await flushUi();
-
     const fullSpan = target.querySelector("#bds-toggle .bds-toggle-full");
     expect(fullSpan).not.toBeNull();
     expect(fullSpan.textContent).toBe("BDS");
     expect(fullSpan.getAttribute("aria-hidden")).toBe("true");
-
-    cleanup();
-  });
-
-  it("toggle contains .bds-toggle-short span with text B", async () => {
-    const { target, cleanup } = renderSvelte(App);
-    await flushUi();
 
     const shortSpan = target.querySelector("#bds-toggle .bds-toggle-short");
     expect(shortSpan).not.toBeNull();
@@ -89,7 +89,22 @@ describe("App toggle button", () => {
     cleanup();
   });
 
-  it("clicking toggle opens the drawer", async () => {
+  it("pins the button when the settings panel asks for it", async () => {
+    const { target, cleanup } = renderSvelte(App);
+    await flushUi();
+    expect(target.querySelector("#bds-toggle")).toBeNull();
+
+    window.dispatchEvent(new CustomEvent("bds:floating-button-changed", { detail: true }));
+    await flushUi();
+
+    expect(target.querySelector("#bds-toggle")).not.toBeNull();
+
+    cleanup();
+  });
+
+  it("pinned button opens the drawer", async () => {
+    appState.settings.floatingButton = "always";
+
     const { target, cleanup } = renderSvelte(App);
     await flushUi();
 
@@ -105,7 +120,9 @@ describe("App toggle button", () => {
     cleanup();
   });
 
-  it("clicking toggle twice closes the drawer", async () => {
+  it("pinned button toggles the drawer closed again", async () => {
+    appState.settings.floatingButton = "always";
+
     const { target, cleanup } = renderSvelte(App);
     await flushUi();
 
@@ -124,6 +141,8 @@ describe("App toggle button", () => {
   });
 
   it("close button inside drawer closes it", async () => {
+    appState.settings.floatingButton = "always";
+
     const { target, cleanup } = renderSvelte(App);
     await flushUi();
 

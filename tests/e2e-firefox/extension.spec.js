@@ -86,8 +86,12 @@ describe("Firefox extension", () => {
     const healthy = await fx.isDriverHealthy();
     expect(healthy).toBe(true);
 
-    const toggle = await fx.driver.findElement({ css: "#bds-toggle" });
-    expect(await toggle.isDisplayed()).toBe(true);
+    // The floating corner button is opt-in now (settings live in DeepSeek's own
+    // Settings dialog), so assert the UI API and the page controls instead.
+    const hasUiApi = await fx.driver.executeScript(
+      "return typeof window.__BDS_UI__?.openDrawer === 'function';",
+    );
+    expect(hasUiApi).toBe(true);
 
     const plusBtn = await fx.driver.findElement({ css: ".bds-plus-btn" });
     expect(plusBtn).toBeTruthy();

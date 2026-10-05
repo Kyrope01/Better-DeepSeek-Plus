@@ -117,7 +117,8 @@ never target them; target `ds-*` + structure.
 * `src/styles/content.css` — structure/layout; legacy `--bds-*` names keep working.
 * `src/lib/page-theme.js` — one light/dark detector for the whole extension.
 * `src/content/ui/native-settings.js` — injects the extension's settings into DeepSeek's
-  own Settings dialog (structure-classified, keep-alive, reversible);
+  own Settings dialog (structure-classified, keep-alive, reversible, and budgeted so
+  scanning can never block the page);
   `NativeSettingsPanel.svelte` mounts the **same** components as the drawer
   (`SettingsPanel` + skills/characters/memory/projects/saved-items/commands), so the dialog
   and the drawer are two views of one settings surface.

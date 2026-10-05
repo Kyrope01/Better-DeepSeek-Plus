@@ -65,6 +65,16 @@ export function mountUi() {
   };
 
   state.ui = api;
+
+  // Small, stable handle for tests and power users. The floating corner button is
+  // opt-in now, so specs (and anyone scripting the extension) need a way to open
+  // the drawer and reach the same API the button used to provide.
+  try {
+    window.__BDS_UI__ = api;
+  } catch (_) {
+    // non-window context
+  }
+
   initPreviewAvoidance(root);
   return api;
 }

@@ -219,7 +219,7 @@
       "deepFetchDepth": "Глубина загрузки веб-страниц",
       "deepFetchDepthHint": "Сколько уровней ссылок проходит Deep Research при чтении страницы (0–5).",
       "showFloatingButton": "Показывать плавающую кнопку BDS",
-"showFloatingButtonHint": "Оставляет кнопку в углу. Если выключить, кнопка скрывается, пока эти настройки доступны в меню DeepSeek."
+      "showFloatingButtonHint": "Показывает плавающую кнопку BDS в углу страницы. По умолчанию выключена — все настройки есть в окне настроек DeepSeek."
     },
     "skillList": {
       "title": "Набор навыков",
@@ -864,8 +864,7 @@
       "tags": "Теги (BDS)",
       "exportChat": "Экспорт чата (BDS)",
       "getBdsApp": "Получить BDS App",
-      "whatsNew": "Что нового?",
-      "bdsSettings": "BDS Настройки"
+      "whatsNew": "Что нового?"
     },
     "commands": {
       "title": "Команды",

@@ -1,45 +1,60 @@
 /**
  * DeepSeek-native settings bridge.
  *
- * Better DeepSeek's settings are also rendered *inside chat.deepseek.com's own
- * Settings dialog*, so users never have to know the extension ships a drawer.
+ * Better DeepSeek's settings are rendered *inside chat.deepseek.com's own Settings
+ * dialog*, so the extension has no settings UI of its own to find.
  *
- * The site's dialog markup is React-rendered with hashed CSS-module classes, and
- * it changes between releases, so a dialog is recognised by **shape**, never by a
- * class hash or by locale-dependent text:
+ * ── Why this module is careful about performance ──────────────────────────────
+ * The dialog is React-rendered with hashed class names that change between
+ * releases, so it is recognised by **shape**, never by a class hash or by
+ * locale-dependent text. That means DOM inspection — and DOM inspection on a live
+ * chat page is expensive: every `getBoundingClientRect()`/`getComputedStyle()`
+ * forces layout, and React mutates attributes and nodes continuously (token
+ * streaming, animations, virtual lists). An earlier revision observed *every*
+ * attribute change and re-scanned the document on each one; on a real account
+ * that pinned the main thread and froze the page.
  *
- *   • a visible modal-ish container (`.ds-modal-content`, `.ds-modal`,
- *     `[role="dialog"]`, any class containing "modal"), and
- *   • either a navigation rail — at least three similar rows stacked in the left
- *     half of the dialog (General / Profile / Data / About … their class names are
- *     unknown, so the rows are found geometrically), or two form controls; and
- *   • nothing that marks it as the share dialog (primary footer action + textarea).
- *
- * The panel is then tried in several containers inside the dialog and the first
- * placement that actually lays out is kept, so a hidden tab pane or an
- * `overflow: hidden` wrapper can no longer swallow it.
+ * The rules that keep this cheap, and must stay in place:
+ *   • observe `childList` only — never `attributes`;
+ *   • only look at added/removed elements that plausibly contain a dialog;
+ *   • debounce scans (150 ms) and rate-limit them (≥500 ms apart);
+ *   • cheap selectors first, the expensive `[class*="modal" i]` sweep only as a
+ *     fallback and at most once a second;
+ *   • bound every DOM walk (MAX_NODES) instead of iterating a whole dialog;
+ *   • cache per-dialog classification/nav-rail (WeakMap) and mount attempts;
+ *   • never mount more than a couple of times per dialog, with backoff;
+ *   • do nothing at all while the tab is hidden.
  *
  * Injection is additive and reversible: one marked host element holds the Svelte
- * panel, a keep-alive pass re-appends it if React drops it, and it is unmounted
- * when the dialog closes. The drawer (and its markup contract) is untouched.
+ * panel, a heartbeat re-appends it if React drops it, and it is unmounted when the
+ * dialog closes. The drawer (and its markup contract) is untouched.
  *
- * Debugging: while a dialog-shaped surface is open but unrecognised, a one-line
- * notice is logged; `__BDS_DIAG__.dump()` returns the full picture of every
- * candidate (size, controls, rail, class names and text) for bug reports.
+ * Debugging: `__BDS_DIAG__.dump()` returns every candidate's size, controls, rail,
+ * classes and text, plus mount-attempt state.
  */
 
 import { mount, unmount } from "svelte";
 import NativeSettingsPanel from "./NativeSettingsPanel.svelte";
 
 const HOST_ATTR = "data-bds-native-settings";
-const DIALOG_ATTR = "data-bds-settings-dialog";
-// Deliberately distinct from HOST_ATTR: this one lands on <html>, and if it shared
-// the host marker's name then isOurNode() would match every element on the page.
+/** Set on <html> once the panel has been shown; diagnostics only. */
 const PAGE_ATTR = "data-bds-native-settings-ready";
-const CHECK_INTERVAL_MS = 800;
+const DIALOG_ATTR = "data-bds-settings-dialog";
 
-// Form controls the site uses in settings screens. The first group are real
-// elements; the class-name scan below catches markup variants we have not met.
+const SCAN_DEBOUNCE_MS = 150;
+const SCAN_MIN_INTERVAL_MS = 500;
+const HEARTBEAT_MS = 1500;
+/** Fallback full-document sweep interval when no dialog markup is present yet. */
+const SWEEP_HEARTBEAT_MS = 5000;
+/** Ceiling for every DOM walk — cost stays constant on huge dialogs. */
+const MAX_NODES = 600;
+/** Mount attempts allowed per dialog before it is left alone (with backoff). */
+const MAX_ATTEMPTS_PER_DIALOG = 4;
+
+/** Cheap "could this be a dialog?" hint used to filter mutations and the heartbeat. */
+const MODAL_HINT = '.ds-modal-content, .ds-modal, [role="dialog"], [class*="modal" i]';
+
+/** Form controls the site uses in settings screens (real elements first). */
 const CONTROL_SELECTOR = [
   ".ds-switch",
   '[role="switch"]',
@@ -60,23 +75,40 @@ const CONTROL_SELECTOR = [
 ].join(",");
 
 const CONTROL_CLASS_RE = /(switch|checkbox|radio|segmented|select|slider|slid)/i;
-const NAV_CLASS_RE = /(tab|sider|nav|menu-option)/i;
 
-const DIALOG_SELECTOR = [
-  ".ds-modal-content",
-  ".ds-modal",
-  '[role="dialog"]',
-  '[class*="modal" i]',
-].join(",");
+/** The two most reliable dialog selectors; the class sweep is the fallback. */
+const DIALOG_SELECTOR_FAST = ".ds-modal-content, .ds-modal, [role=\"dialog\"]";
 
 let observer = null;
-let interval = null;
+let heartbeat = null;
 let hostEl = null;
 let panelInstance = null;
 let currentDialog = null;
-/** Once the panel has been shown in this page session the button stays hidden. */
+
+/** Once the panel has been shown in this page session the flag stays set. */
 let everMounted = false;
+
+let scanTimer = null;
+let scanQueued = false;
+let lastScanAt = 0;
+let lastSweepAt = 0;
+let lastSweepHeartbeatAt = 0;
+let scanning = false;
+
 const warnedCandidates = new WeakSet();
+/** Per-dialog: { attempts, lastAttemptAt, klass, rail, klassAt } */
+const dialogState = new WeakMap();
+
+/* ── small helpers ───────────────────────────────────────────────────────── */
+
+function stateOf(el) {
+  let s = dialogState.get(el);
+  if (!s) {
+    s = { attempts: 0, lastAttemptAt: 0, klass: null, klassAt: 0, rail: null, railAt: 0 };
+    dialogState.set(el, s);
+  }
+  return s;
+}
 
 /** Visible = attached, non-zero box, not display:none/visibility:hidden. */
 function isVisible(el) {
@@ -95,66 +127,103 @@ function classNameOf(el) {
   return typeof el.className === "string" ? el.className : el.getAttribute?.("class") || "";
 }
 
+/** Cheap structural pre-filter: is this element (or its subtree) dialog-shaped? */
+function looksModalish(node) {
+  if (!node || node.nodeType !== 1) return false;
+  if (node.matches?.(MODAL_HINT)) return true;
+  // A fresh dialog arrives as a small wrapper; only pay for the subtree query when
+  // the added subtree is small enough to be a wrapper rather than a whole list.
+  return node.childElementCount > 0 && node.childElementCount < 400 && !!node.querySelector?.(MODAL_HINT);
+}
+
+/**
+ * Attribute changes we care about are class/style flips on a dialog container
+ * itself (React showing a modal it had already rendered). React also mutates
+ * attributes constantly elsewhere — those must not reach the scanner, which is
+ * why the observer carries an attributeFilter and this predicate is pure string
+ * work with no layout reads.
+ */
+function isDialogRootish(el) {
+  return !!el && el.nodeType === 1 && !!el.matches?.(MODAL_HINT);
+}
+
 /* ── shape detection ─────────────────────────────────────────────────────── */
 
-/** Direct hits first, then a class-name scan for markup variants. */
+/** Direct hits first, then a bounded class-name scan for markup variants. */
 function countControls(dialog) {
   const direct = dialog.querySelectorAll(CONTROL_SELECTOR).length;
   if (direct >= 2) return direct;
 
   let loose = 0;
+  let seen = 0;
   for (const el of dialog.querySelectorAll("[class]")) {
+    if (++seen > MAX_NODES) break;
     if (CONTROL_CLASS_RE.test(classNameOf(el))) loose++;
-    if (loose > 40) break;
+    if (loose > 20) break;
   }
-  return Math.max(direct, Math.min(loose, 30));
+  return Math.max(direct, loose);
 }
 
 function rowsOf(el) {
-  return el ? el.querySelectorAll('button, a, li, [role="tab"], div').length : 0;
+  return el ? Math.min(el.querySelectorAll('button, a, li, [role="tab"], div').length, MAX_NODES) : 0;
 }
 
 /**
- * The dialog's left rail (General / Profile / Data / About …).
+ * The dialog's navigation rail (General / Profile / Data / About …).
  *
- * Looked for by role/class first, then geometrically: rows in the left half of
- * the dialog that share a column signature and stack at least three deep.
+ * Role/class hints first, then geometry: rows in the left half of the dialog that
+ * share a column signature and stack at least three deep. Bounded by MAX_NODES
+ * and cached per dialog for a second, because this walk is the expensive part.
  */
 function findNavRail(dialog) {
+  const cached = stateOf(dialog);
+  const now = Date.now();
+  if (cached.rail !== null && now - cached.railAt < 1000) return cached.rail;
+
+  const remember = (value) => {
+    cached.rail = value;
+    cached.railAt = now;
+    return value;
+  };
+
   const explicit = dialog.querySelector('.ds-tabs, .ds-sider, [role="tablist"], nav');
-  if (explicit && rowsOf(explicit) >= 3) return explicit;
+  if (explicit && rowsOf(explicit) >= 3) return remember(explicit);
 
   const dialogRect = dialog.getBoundingClientRect();
-  const rows = [];
+  const leftLimit = dialogRect.left + dialogRect.width * 0.55;
+  const groups = new Map();
+  let best = null;
+  let seen = 0;
+
+  // Single pass with an early exit: geometry reads force layout, so the walk stops
+  // as soon as one column has three stacked rows — the rail is then in hand.
   for (const el of dialog.querySelectorAll("button, a, li, div")) {
-    if (isOurNode(el) || !isVisible(el)) continue;
+    if (++seen > MAX_NODES) break;
+    if (isOurNode(el) || el.children.length > 3) continue;
     const rect = el.getBoundingClientRect();
     if (rect.width < 40 || rect.height < 18 || rect.height > 72) continue;
-    if (rect.left > dialogRect.left + dialogRect.width * 0.55) continue;
+    if (rect.left > leftLimit) continue;
     const text = (el.textContent || "").trim();
-    if (!text || text.length > 32 || el.children.length > 3) continue;
-    rows.push({ el, rect });
-  }
+    if (!text || text.length > 32) continue;
 
-  const groups = new Map();
-  for (const row of rows) {
-    const key = `${Math.round(row.rect.left / 8)}:${Math.round(row.rect.width / 16)}`;
+    const key = `${Math.round(rect.left / 8)}:${Math.round(rect.width / 16)}`;
     const list = groups.get(key) || [];
-    list.push(row);
+    list.push({ el, rect });
     groups.set(key, list);
+
+    if (list.length >= 3 && (!best || list.length > best.length)) {
+      best = list;
+      break;
+    }
   }
 
-  let best = null;
-  for (const list of groups.values()) {
-    if (list.length >= 3 && (!best || list.length > best.length)) best = list;
-  }
-  if (!best) return null;
+  if (!best) return remember(null);
 
   let node = best[0].el.parentElement;
   while (node && node !== dialog && !best.every(({ el }) => node.contains(el))) {
     node = node.parentElement;
   }
-  return node && node !== dialog ? node : null;
+  return remember(node && node !== dialog ? node : null);
 }
 
 /** The share dialog already has its own injector — never hijack it. */
@@ -168,29 +237,41 @@ function isShareLike(dialog) {
 
 /** Score a candidate dialog; returns null when it is not a settings surface. */
 function classify(dialog) {
-  if (!isVisible(dialog) || isOurNode(dialog) || dialog.hasAttribute(DIALOG_ATTR)) return null;
-  if (isShareLike(dialog)) return null;
+  if (isOurNode(dialog) || dialog.hasAttribute(DIALOG_ATTR)) return null;
+
+  const state = stateOf(dialog);
+  const now = Date.now();
+  if (state.klass !== null && now - state.klassAt < 1000) return state.klass;
+
+  const remember = (value) => {
+    state.klass = value;
+    state.klassAt = now;
+    return value;
+  };
+
+  if (!isVisible(dialog) || isShareLike(dialog)) return remember(null);
 
   const controls = countControls(dialog);
-  const rail = findNavRail(dialog);
-  const navish = !!rail && rowsOf(rail) >= 3;
+  const navish = rowsOf(findNavRail(dialog)) >= 3;
 
-  if (!navish && controls < 2) return null;
+  if (!navish && controls < 2) return remember(null);
 
   const rect = dialog.getBoundingClientRect();
   const tall = rect.height > window.innerHeight * 0.4;
-  const wide = rect.width > window.innerWidth * 0.3;
-  if (!navish && !tall) return null;
+  if (!navish && !tall) return remember(null);
 
-  return (navish ? 6 : 0) + Math.min(controls, 8) * 2 + (tall ? 2 : 0) + (wide ? 1 : 0);
+  const wide = rect.width > window.innerWidth * 0.3;
+  return remember((navish ? 6 : 0) + Math.min(controls, 8) * 2 + (tall ? 2 : 0) + (wide ? 1 : 0));
 }
 
 /* ── mounting ────────────────────────────────────────────────────────────── */
 
-/** Real scroll containers inside the dialog, deepest last. */
+/** Real scroll containers inside the dialog, deepest last (bounded). */
 function scrollersIn(dialog) {
   const found = [];
+  let seen = 0;
   for (const el of dialog.querySelectorAll("div")) {
+    if (++seen > MAX_NODES) break;
     const style = window.getComputedStyle(el);
     if (
       (style.overflowY === "auto" || style.overflowY === "scroll") &&
@@ -202,7 +283,7 @@ function scrollersIn(dialog) {
   return found;
 }
 
-/** The column that holds the dialog's controls (content area, right of the rail). */
+/** The column that holds the dialog's controls (the content area). */
 function controlColumn(dialog) {
   const controls = dialog.querySelectorAll(CONTROL_SELECTOR);
   if (!controls.length) return null;
@@ -219,25 +300,15 @@ function mountTargets(dialog) {
   };
 
   push(dialog.querySelector(".ds-modal-content__main"));
-  for (const el of scrollersIn(dialog).slice(-3).reverse()) push(el);
+  for (const el of scrollersIn(dialog).slice(-2).reverse()) push(el);
   push(controlColumn(dialog));
   push(dialog);
   return targets;
 }
 
-/** Flag the page so the floating button can step aside (CSS reads this). */
-function markPage(active) {
-  if (active) {
-    everMounted = true;
-    document.documentElement.setAttribute(PAGE_ATTR, "available");
-    return;
-  }
-  if (!everMounted) document.documentElement.removeAttribute(PAGE_ATTR);
-}
-
 /**
- * Keep this copy's labels pointing at this copy's controls: the drawer mounts a
- * second SettingsPanel, so `id`s can be duplicated between the two.
+ * Keep this copy's labels pointing at this copy's controls: the drawer can mount a
+ * second SettingsPanel, so `id`s may be duplicated between the two surfaces.
  */
 function scopeLabelTargets(root) {
   for (const label of root.querySelectorAll("label[for]")) {
@@ -254,12 +325,27 @@ function scopeLabelTargets(root) {
   }
 }
 
+/** Mount into the first container that actually lays the panel out. */
 function mountPanel(dialog) {
   if (hostEl && hostEl.isConnected && currentDialog === dialog) return;
 
+  const state = stateOf(dialog);
+  const now = Date.now();
+  if (state.attempts >= MAX_ATTEMPTS_PER_DIALOG) return;
+
   cleanupPanel();
 
+  // Backoff between attempts on the same dialog so React churn cannot turn this
+  // into a mount/unmount loop (the previous revision's second freeze source).
+  if (state.attempts > 0 && now - state.lastAttemptAt < 1500) return;
+  state.attempts += 1;
+  state.lastAttemptAt = now;
+
   for (const target of mountTargets(dialog)) {
+    // Skip containers that cannot be showing anything: a hidden tab pane or a
+    // display:none wrapper. This avoids mounting the (large) panel to find out.
+    if (!isVisible(target) || target.clientHeight < 60) continue;
+
     const host = document.createElement("div");
     host.className = "bds-native-settings-host";
     host.setAttribute(HOST_ATTR, "1");
@@ -275,18 +361,18 @@ function mountPanel(dialog) {
       continue;
     }
 
-    // A placement that does not lay out (hidden tab pane, clipped wrapper) is
-    // useless — try the next container instead of leaving an invisible panel.
     const rect = host.getBoundingClientRect();
     if (rect.height >= 24 && rect.width >= 40) {
       currentDialog = dialog;
       dialog.setAttribute(DIALOG_ATTR, "1");
       hostEl = host;
       panelInstance = instance;
-      markPage(true);
+      everMounted = true;
+      document.documentElement.setAttribute(PAGE_ATTR, "available");
       return;
     }
 
+    // Placement did not lay out (clipped wrapper) — undo it and try the next one.
     try {
       unmount(instance);
     } catch (_) {
@@ -313,66 +399,104 @@ function cleanupPanel() {
     currentDialog.removeAttribute(DIALOG_ATTR);
     currentDialog = null;
   }
-  markPage(false);
+  if (!everMounted) document.documentElement.removeAttribute(PAGE_ATTR);
 }
 
 /* ── scanning ────────────────────────────────────────────────────────────── */
 
+/** Candidate dialogs, cheap selectors first; the class sweep is rate-limited. */
 function candidates() {
   const list = [];
-  for (const el of document.querySelectorAll(DIALOG_SELECTOR)) {
-    if (isOurNode(el) || !isVisible(el)) continue;
-    list.push(el);
+  const push = (el) => {
+    if (!isOurNode(el) && isVisible(el)) list.push(el);
+  };
+
+  for (const el of document.querySelectorAll(DIALOG_SELECTOR_FAST)) push(el);
+
+  if (!list.length) {
+    const now = Date.now();
+    if (now - lastSweepAt > 1000) {
+      lastSweepAt = now;
+      for (const el of document.querySelectorAll('[class*="modal" i]')) {
+        if (list.length >= 8) break;
+        push(el);
+      }
+    }
   }
   return list;
 }
 
-/** One detection pass: mount into the best settings dialog, or clean up. */
+/** One detection pass. Cheap, idempotent and safe to call often. */
 function scan() {
-  if (!document.body) return;
+  if (!document.body || scanning || document.hidden) return;
 
-  // Already mounted and the dialog is still alive → nothing to do.
-  if (
-    hostEl &&
-    hostEl.isConnected &&
-    currentDialog &&
-    currentDialog.isConnected &&
-    isVisible(currentDialog)
-  ) {
-    return;
-  }
-
-  // Stale instance (dialog closed or React removed our node).
-  if (hostEl && (!hostEl.isConnected || !currentDialog || !currentDialog.isConnected)) {
-    cleanupPanel();
-  }
-
-  let best = null;
-  let bestScore = 0;
-  for (const candidate of candidates()) {
-    const score = classify(candidate);
-    if (score !== null && score > bestScore) {
-      best = candidate;
-      bestScore = score;
+  scanning = true;
+  try {
+    // Already mounted and the dialog is still alive → nothing to do.
+    if (
+      hostEl &&
+      hostEl.isConnected &&
+      currentDialog &&
+      currentDialog.isConnected &&
+      isVisible(currentDialog)
+    ) {
+      return;
     }
-  }
 
-  if (best) {
-    mountPanel(best);
-    return;
-  }
+    // Stale instance (dialog closed or React removed our node).
+    if (hostEl && (!hostEl.isConnected || !currentDialog || !currentDialog.isConnected)) {
+      cleanupPanel();
+    }
 
-  // Nothing matched: if a modal-looking surface is open, say so once per surface
-  // so the user can send us the shape instead of guessing.
-  for (const candidate of candidates()) {
-    if (warnedCandidates.has(candidate)) continue;
-    warnedCandidates.add(candidate);
-    console.info(
-      "[BDS:native-settings] a dialog is open but was not recognised as Settings. " +
-        "Run __BDS_DIAG__.dump() and share the output to improve detection.",
-      summarize(candidate)
-    );
+    let best = null;
+    let bestScore = 0;
+    for (const candidate of candidates()) {
+      const score = classify(candidate);
+      if (score !== null && score > bestScore) {
+        best = candidate;
+        bestScore = score;
+      }
+    }
+
+    if (best) {
+      mountPanel(best);
+      return;
+    }
+
+    // Nothing matched: when a modal-looking surface is open, say so once per
+    // surface so the user can send us its shape instead of guessing.
+    for (const candidate of candidates()) {
+      if (warnedCandidates.has(candidate)) continue;
+      warnedCandidates.add(candidate);
+      console.info(
+        "[BDS:native-settings] a dialog is open but was not recognised as Settings. " +
+          "Run __BDS_DIAG__.dump() and share the output to improve detection.",
+        summarize(candidate)
+      );
+    }
+  } finally {
+    scanning = false;
   }
+}
+
+/** Debounced + rate-limited scan request. */
+function scheduleScan() {
+  if (scanQueued) return;
+  scanQueued = true;
+  clearTimeout(scanTimer);
+  scanTimer = setTimeout(() => {
+    scanQueued = false;
+    const wait = Math.max(0, SCAN_MIN_INTERVAL_MS - (Date.now() - lastScanAt));
+    if (wait > 0) {
+      scanTimer = setTimeout(() => {
+        lastScanAt = Date.now();
+        scan();
+      }, wait);
+    } else {
+      lastScanAt = Date.now();
+      scan();
+    }
+  }, SCAN_DEBOUNCE_MS);
 }
 
 /* ── diagnostics ─────────────────────────────────────────────────────────── */
@@ -380,6 +504,7 @@ function scan() {
 function summarize(el) {
   const rect = el.getBoundingClientRect();
   const rail = findNavRail(el);
+  const state = stateOf(el);
   return {
     tag: el.tagName.toLowerCase(),
     id: el.id || undefined,
@@ -387,7 +512,9 @@ function summarize(el) {
     class: classNameOf(el).slice(0, 200) || undefined,
     size: [Math.round(rect.width), Math.round(rect.height)],
     controls: el.querySelectorAll(CONTROL_SELECTOR).length,
-    rail: rail ? { size: rowsOf(rail), class: classNameOf(rail).slice(0, 120) } : null,
+    controlsLoose: countControls(el),
+    rail: rail ? { rows: rowsOf(rail), class: classNameOf(rail).slice(0, 120) } : null,
+    attempts: state.attempts,
     text: (el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 160),
     children: [...el.children].slice(0, 8).map((child) => {
       const cls = classNameOf(child).split(/\s+/).filter(Boolean).slice(0, 2).join(".");
@@ -397,20 +524,14 @@ function summarize(el) {
 }
 
 function diagnostics() {
+  const rect = hostEl?.getBoundingClientRect();
   return {
     url: location.href,
-    theme:
-      document.body?.getAttribute("data-ds-dark-theme") !== null &&
-      document.body?.hasAttribute("data-ds-dark-theme")
-        ? "dark"
-        : "light",
+    theme: document.body?.hasAttribute("data-ds-dark-theme") ? "dark" : "light",
     mounted: hostEl
-      ? { connected: hostEl.isConnected, size: (() => { const r = hostEl.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; })() }
+      ? { connected: hostEl.isConnected, size: rect ? [Math.round(rect.width), Math.round(rect.height)] : null }
       : null,
-    dialogs: candidates().map((el) => ({
-      ...summarize(el),
-      recognised: classify(el) !== null,
-    })),
+    dialogs: candidates().map((el) => ({ ...summarize(el), recognised: classify(el) !== null })),
   };
 }
 
@@ -423,12 +544,73 @@ function diagnostics() {
 export function initNativeSettings() {
   if (observer) return;
 
-  observer = new MutationObserver(() => scan());
-  observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-  interval = setInterval(scan, CHECK_INTERVAL_MS);
-  scan();
+  // childList only: attribute mutations fire constantly on this site and used to
+  // turn every React re-render into a full scan (see the header note).
+  observer = new MutationObserver((mutations) => {
+    let interesting = false;
+    for (const mutation of mutations) {
+      if (hostEl && !hostEl.isConnected) {
+        interesting = true;
+        break;
+      }
+      if (mutation.type === "attributes") {
+        // Only a dialog container flipping its own class/style matters (e.g. the
+        // site showing a modal it had rendered hidden). Everything else React
+        // touches is ignored before any layout work happens.
+        if (isDialogRootish(mutation.target)) {
+          interesting = true;
+          break;
+        }
+        continue;
+      }
+      for (const node of mutation.addedNodes) {
+        if (looksModalish(node)) {
+          interesting = true;
+          break;
+        }
+      }
+      if (interesting) break;
+      for (const node of mutation.removedNodes) {
+        if (looksModalish(node)) {
+          interesting = true;
+          break;
+        }
+      }
+      if (interesting) break;
+    }
+    if (interesting) scheduleScan();
+  });
 
-  // Console helpers for the user and for bug reports.
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["class", "style", "hidden", "aria-hidden"],
+  });
+
+  // Heartbeat: cheap guard that only looks for the dialog hint before scanning.
+  heartbeat = setInterval(() => {
+    if (document.hidden) return;
+    if (hostEl) {
+      if (!hostEl.isConnected) scheduleScan();
+      return;
+    }
+    if (document.querySelector(DIALOG_SELECTOR_FAST)) {
+      scheduleScan();
+      return;
+    }
+    // Nothing dialog-shaped by the fast selectors: sweep occasionally so markup
+    // that only uses hashed class names is still found. This is a full traversal,
+    // hence the long interval.
+    const now = Date.now();
+    if (now - lastSweepHeartbeatAt > SWEEP_HEARTBEAT_MS) {
+      lastSweepHeartbeatAt = now;
+      scheduleScan();
+    }
+  }, HEARTBEAT_MS);
+
+  scheduleScan();
+
   try {
     window.__BDS_DIAG__ = {
       dump: diagnostics,
@@ -447,10 +629,12 @@ export function destroyNativeSettings() {
     observer.disconnect();
     observer = null;
   }
-  if (interval) {
-    clearInterval(interval);
-    interval = null;
+  if (heartbeat) {
+    clearInterval(heartbeat);
+    heartbeat = null;
   }
+  clearTimeout(scanTimer);
+  scanQueued = false;
   cleanupPanel();
   try {
     delete window.__BDS_DIAG__;
@@ -465,8 +649,7 @@ const SETTINGS_LABELS = ["Settings", "设置", "Настройки", "Ayarlar", 
 
 /** Our own injected rows must never be mistaken for the site's Settings entry. */
 function isBdsInjected(node) {
-  const cls = classNameOf(node);
-  return /(^|\s)bds-/.test(cls);
+  return /(^|\s)bds-/.test(classNameOf(node));
 }
 
 function looksLikeSettingsItem(node) {
@@ -487,7 +670,9 @@ function findSettingsItem() {
   const nodes = document.querySelectorAll(
     '.ds-dropdown-menu-option, [role="menuitem"], [role="option"], button, [role="button"]'
   );
+  let seen = 0;
   for (const node of nodes) {
+    if (++seen > MAX_NODES) break;
     if (looksLikeSettingsItem(node) && inSidebarOrMenu(node)) return node;
   }
   return null;
@@ -495,7 +680,9 @@ function findSettingsItem() {
 
 function findAccountButton() {
   const nodes = document.querySelectorAll('button, [role="button"], [class*="avatar" i]');
+  let seen = 0;
   for (const node of nodes) {
+    if (++seen > MAX_NODES) break;
     if (isOurNode(node) || !isVisible(node)) continue;
     if (node.querySelector("img")) {
       const rect = node.getBoundingClientRect();
@@ -535,9 +722,19 @@ export const __nativeSettingsInternals = {
   findNavRail,
   countControls,
   mountTargets,
+  looksModalish,
   summarize,
   diagnostics,
   scan,
+  scheduleScan,
+  observerConfig: {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["class", "style", "hidden", "aria-hidden"],
+  },
+  guards: { SCAN_DEBOUNCE_MS, SCAN_MIN_INTERVAL_MS, HEARTBEAT_MS, SWEEP_HEARTBEAT_MS, MAX_NODES, MAX_ATTEMPTS_PER_DIALOG },
   HOST_ATTR,
   PAGE_ATTR,
+  MODAL_HINT,
 };

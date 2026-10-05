@@ -219,7 +219,7 @@
       "deepFetchDepth": "Web search fetch depth",
       "deepFetchDepthHint": "How many levels of links Deep Research follows while reading a page (0–5).",
       "showFloatingButton": "Show the floating BDS button",
-"showFloatingButtonHint": "Keeps the corner button visible. Leave it off and the button hides itself while these settings are available in DeepSeek's own menu."
+      "showFloatingButtonHint": "Shows the floating BDS button in the corner of the page. Off by default — every setting is available in DeepSeek's own Settings dialog."
     },
     "skillList": {
       "title": "Skill Set",
@@ -834,8 +834,7 @@
       "tags": "Tags (BDS)",
       "exportChat": "Export Chat (BDS)",
       "getBdsApp": "Get BDS App",
-      "whatsNew": "What's New?",
-      "bdsSettings": "BDS Settings"
+      "whatsNew": "What's New?"
     },
     "savedItems": {
       "title": "Saved Items",

@@ -48,6 +48,8 @@
   function setFloatingButton(value) {
     floatingButton = value;
     appState.settings.floatingButton = value ? "always" : "auto";
+    // appState is not reactive, so the page shell is told explicitly.
+    window.dispatchEvent(new CustomEvent("bds:floating-button-changed", { detail: value }));
     try {
       chrome.storage.local.set({
         [STORAGE_KEYS.settings]: JSON.parse(JSON.stringify(appState.settings)),

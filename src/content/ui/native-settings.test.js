@@ -2,7 +2,15 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { __nativeSettingsInternals } from "./native-settings.js";
 
-const { classify, findNavRail, countControls, mountTargets } = __nativeSettingsInternals;
+const {
+  classify,
+  findNavRail,
+  countControls,
+  mountTargets,
+  looksModalish,
+  observerConfig,
+  guards,
+} = __nativeSettingsInternals;
 
 /** jsdom reports zero-size boxes; make a node look like a real dialog. */
 function makeVisible(el, width = 620, height = 700, left = 100, top = 60) {
@@ -127,6 +135,39 @@ describe("native settings dialog detection", () => {
     layOut(dialog, { width: 525, height: 600, left: 400, top: 120 });
     expect(classify(dialog)).toBeGreaterThan(0);
     document.documentElement.removeAttribute(__nativeSettingsInternals.PAGE_ATTR);
+  });
+
+  it("filters mutations cheaply so React churn cannot trigger scans", () => {
+    // Regression: observing bare attributes made every React attribute write a
+    // full scan (forced layout storm) and froze the page on a real account.
+    expect(observerConfig.childList).toBe(true);
+    expect(observerConfig.subtree).toBe(true);
+    expect(Array.isArray(observerConfig.attributeFilter)).toBe(true);
+    expect(observerConfig.attributeFilter).toContain("class");
+
+    const text = document.createTextNode("streamed token");
+    expect(looksModalish(text)).toBe(false);
+
+    const plain = document.createElement("div");
+    plain.className = "hashed_123";
+    expect(looksModalish(plain)).toBe(false);
+
+    const modal = document.createElement("div");
+    modal.className = "ds-modal-content";
+    expect(looksModalish(modal)).toBe(true);
+
+    const wrapper = document.createElement("div");
+    wrapper.appendChild(document.createElement("div")).className = "ds-modal";
+    expect(looksModalish(wrapper)).toBe(true);
+  });
+
+  it("keeps scan guardrails in place (debounce, rate limit, bounded walks)", () => {
+    expect(guards.SCAN_DEBOUNCE_MS).toBeGreaterThanOrEqual(100);
+    expect(guards.SCAN_MIN_INTERVAL_MS).toBeGreaterThanOrEqual(300);
+    expect(guards.HEARTBEAT_MS).toBeGreaterThanOrEqual(1000);
+    expect(guards.SWEEP_HEARTBEAT_MS).toBeGreaterThanOrEqual(3000);
+    expect(guards.MAX_NODES).toBeLessThanOrEqual(1000);
+    expect(guards.MAX_ATTEMPTS_PER_DIALOG).toBeLessThanOrEqual(6);
   });
 
   it("offers several mount targets, ending with the dialog itself", () => {

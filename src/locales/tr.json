@@ -219,7 +219,7 @@
       "deepFetchDepth": "Web arama getirme derinliği",
       "deepFetchDepthHint": "Deep Research bir sayfayı okurken kaç bağlantı seviyesi takip eder (0–5).",
       "showFloatingButton": "Yüzen BDS düğmesini göster",
-"showFloatingButtonHint": "Köşedeki düğmeyi görünür tutar. Kapatırsanız, bu ayarlar DeepSeek'in kendi menüsünden açılabildiği sürece düğme gizlenir."
+      "showFloatingButtonHint": "Sayfanın köşesinde yüzen BDS düğmesini gösterir. Varsayılan olarak kapalıdır — tüm ayarlar DeepSeek'in kendi ayarlar penceresinde bulunur."
     },
     "skillList": {
       "title": "Yetenek Seti",
@@ -864,8 +864,7 @@
       "tags": "Etiketler (BDS)",
       "exportChat": "Sohbeti Dışa Aktar (BDS)",
       "getBdsApp": "BDS Uygulamasını İndir",
-      "whatsNew": "Neler Yeni?",
-      "bdsSettings": "BDS Ayarları"
+      "whatsNew": "Neler Yeni?"
     },
     "commands": {
       "title": "Komutlar",

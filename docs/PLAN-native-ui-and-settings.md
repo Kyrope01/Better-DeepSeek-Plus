@@ -139,13 +139,17 @@ base type, radius from `--dsw-radius-*` (site fallback 10px for controls, 18px f
 * **Keep-alive**: a lightweight interval plus the same observer re-inserts the host element
   if React removes it, and removes it when the dialog closes. Guards: it never re-runs while
   the element is connected (`el.isConnected`), and never observes our own subtree.
-* **Entry points**:
- 1. The dialog itself — a “Better DeepSeek” row injected into the account dropdown by
-    `SidebarMenuInjector` opens the drawer's full settings tab (`bds:open-settings`).
- 2. `openNativeSettings()` in `native-settings.js` — used by tests and by non-UI callers —
-    finds the site's own Settings menu entry by its visible wording (“Settings”, “设置”,
-    “Настройки”, “Ayarlar”, “تنظیمات”), constrained to menu items inside the sidebar or a
-    dropdown; when no menu is open it clicks the account button first and retries.
+* **Entry points**: the site's own Settings dialog is the only surface — the extension
+  adds no button, badge or menu row of its own. `openNativeSettings()` in
+  `native-settings.js` (used by scripts/tests) finds the site's Settings entry by its
+  visible wording (“Settings”, “设置”, “Настройки”, “Ayarlar”, “تنظیمات”), constrained to
+  menu items inside the sidebar or a dropdown, and clicks the account button first when
+  no menu is open.
+* **Performance contract** (a real-account freeze taught this the hard way): observe
+  `childList` plus a filtered attribute set only, debounce 150 ms, rate-limit 500 ms,
+  bound every DOM walk (`MAX_NODES`), cache classification/rail per dialog, cap mount
+  attempts per dialog, and do nothing while the tab is hidden. `__BDS_DIAG__.dump()`
+  reports the state of every candidate dialog.
 * The detector is designed around **structure, not text**, so it works in every locale.
 
 ### 6.2 Panel content
@@ -153,7 +157,9 @@ base type, radius from `--dsw-radius-*` (site fallback 10px for controls, 18px f
 `src/content/ui/NativeSettingsPanel.svelte` mounts the **same components the drawer uses**,
 so nowhere is a partial copy of the settings:
 
-* A native header (“Better DeepSeek” + version badge + “Open in sidebar”) and a hint line.
+* A native header (“Better DeepSeek” + version badge + “Open in sidebar”), a hint line
+  and the *Show the floating BDS button* switch (off by default — there is no floating
+  button unless the user asks for one).
 * `SettingsPanel.svelte` — the complete editor: language & locale, chat & messages,
   prompt & memory, projects & files, deep research, voice, integrations (search providers,
   MCP servers), utilities and custom CSS.

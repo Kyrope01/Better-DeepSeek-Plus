@@ -224,17 +224,26 @@
     openLiveMode();
   });
 
-  // Floating button policy: "always" pins it, "auto" (default) lets it step aside
-  // once the settings bridge is live inside DeepSeek's own Settings dialog — see
-  // the html[data-bds-native-settings] rule in content.css.
-  $effect(() => {
-    const mode = appState.settings.floatingButton === "always" ? "always" : "auto";
-    if (mode === "always") {
-      document.documentElement.setAttribute("data-bds-floating-button", "always");
-    } else {
-      document.documentElement.removeAttribute("data-bds-floating-button");
-    }
+  // The floating corner button is gone by design: the extension's settings live in
+  // DeepSeek's own Settings dialog. It is only rendered when the user explicitly
+  // pins it (the switch at the top of that panel) or on the Android target, which
+  // has no site menu to inject into as a guaranteed fallback.
+  //
+  // `appState` is a plain object (not $state), so the panel signals changes with an
+  // event instead of relying on reactivity.
+  const isAndroidTarget = (process.env.BDS_TARGET || "chrome") === "android";
+  let floatingPinned = $state(appState.settings.floatingButton === "always");
+  const showFloatingButton = $derived(floatingPinned || isAndroidTarget);
+
+  function syncFloatingButton() {
+    floatingPinned = appState.settings.floatingButton === "always";
+  }
+
+  window.addEventListener("bds:floating-button-changed", (event) => {
+    floatingPinned = event.detail === true;
   });
+  // Settings changed elsewhere (drawer, storage sync) → re-read the flag.
+  window.addEventListener("bds:settingsChanged", syncFloatingButton);
 
   // The panel inside DeepSeek's own Settings dialog can ask for the page's
   // API playground (a page-level surface, not a drawer section).
@@ -253,16 +262,18 @@
   });
 </script>
 
-<button
-  id="bds-toggle"
-  type="button"
-  onclick={toggleDrawer}
-  aria-label="Better DeepSeek"
-  title="Better DeepSeek — open settings"
->
-  <span class="bds-toggle-full" aria-hidden="true">BDS</span>
-  <span class="bds-toggle-short" aria-hidden="true">B</span>
-</button>
+{#if showFloatingButton}
+  <button
+    id="bds-toggle"
+    type="button"
+    onclick={toggleDrawer}
+    aria-label="Better DeepSeek"
+    title="Better DeepSeek — open settings"
+  >
+    <span class="bds-toggle-full" aria-hidden="true">BDS</span>
+    <span class="bds-toggle-short" aria-hidden="true">B</span>
+  </button>
+{/if}
 
 <Drawer bind:this={drawerRef} open={drawerOpen} onclose={closeDrawer} onopenapiplayground={openApiPlayground} />
 
