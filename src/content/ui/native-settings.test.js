@@ -13,6 +13,9 @@ const {
   looksModalish,
   isDialogRootish,
   placementOk,
+  contentOffsetLeft,
+  injectRailItem,
+  cleanupPanel,
   registerShadowRoot,
   collectShadowRootsIn,
   queryRoots,
@@ -268,20 +271,24 @@ describe("native settings dialog detection", () => {
     expect(targets[0]).toBe(content);
   });
 
-  it("rejects a placement that reports a size but sits outside the card", () => {
+  it("rejects a placement with no usable area inside the card", () => {
     document.body.innerHTML = `
-      <div class="hashed-card-4a1b" id="card"></div>
+      <div class="hashed-card" id="card"></div>
       <div id="host"></div>`;
     const card = document.getElementById("card");
     const host = document.getElementById("host");
-    makeVisible(card, 780, 520, 100, 100);           // card spans y 100..620
-    makeVisible(host, 760, 300, 110, 700);           // host starts below the card
-    expect(placementOk(host, card)).toBe(false);
+    makeVisible(card, 780, 520, 100, 100);
 
-    makeVisible(host, 760, 300, 110, 400);           // overlapping, inside
+    makeVisible(host, 760, 300, 110, 120);   // real area inside the card
     expect(placementOk(host, card)).toBe(true);
 
-    makeVisible(host, 60, 300, 110, 400);            // squeezed column
+    makeVisible(host, 60, 300, 110, 120);    // squeezed column
+    expect(placementOk(host, card)).toBe(false);
+
+    makeVisible(host, 760, 40, 110, 120);    // no usable height
+    expect(placementOk(host, card)).toBe(false);
+
+    makeVisible(host, 760, 300, 900, 120);   // horizontally outside the card
     expect(placementOk(host, card)).toBe(false);
   });
 
@@ -338,6 +345,58 @@ describe("native settings dialog detection", () => {
     // Simulate a click landing on the container itself.
     big.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(read).toBe(false);
+  });
+
+  it("injects a rail entry and switches between the site's page and ours", async () => {
+    // The site's tab rail: General / Profile / Data / About (hashed classes).
+    document.body.innerHTML = `
+      <div class="hashed-card" id="card">
+        <div class="hashed-rail" id="rail">
+          <div class="hashed-item">General</div>
+          <div class="hashed-item">Profile</div>
+          <div class="hashed-item">Data</div>
+          <div class="hashed-item">About</div>
+        </div>
+        <div class="hashed-content" id="content"><div class="hashed-switch-row"></div></div>
+      </div>`;
+    const card = document.getElementById("card");
+    const rail = document.getElementById("rail");
+    const content = document.getElementById("content");
+    makeVisible(card, 780, 560, 120, 100);
+    makeVisible(rail, 180, 480, 140, 130);
+    makeVisible(content, 520, 460, 330, 140);
+    [...rail.children].forEach((el, i) => makeVisible(el, 150, 40, 150, 150 + i * 48));
+    makeVisible(content.firstElementChild, 500, 40, 340, 160);
+
+    injectRailItem(card);
+    const item = rail.querySelector("[data-bds-rail-item]");
+    expect(item).not.toBeNull();
+    expect(item.textContent.trim()).toBeTruthy();
+    // Cloned from the site's own rows, so it inherits their styling.
+    expect(item.className).toBe(rail.children[rail.children.length - 2].className);
+
+    cleanupPanel();
+    expect(rail.querySelector("[data-bds-rail-item]")).toBeNull();
+  });
+
+  it("mounts the overlay inside the card, right of the rail", () => {
+    document.body.innerHTML = `
+      <div class="hashed-card" id="card2">
+        <div class="hashed-rail" id="rail2">
+          <div class="hashed-item">General</div><div class="hashed-item">Profile</div><div class="hashed-item">Data</div>
+        </div>
+        <div class="hashed-content" id="content2"><div></div></div>
+      </div>`;
+    const card = document.getElementById("card2");
+    const rail = document.getElementById("rail2");
+    const content = document.getElementById("content2");
+    makeVisible(card, 800, 560, 100, 100);
+    makeVisible(rail, 180, 480, 120, 130);
+    makeVisible(content, 540, 460, 320, 140);
+    [...rail.children].forEach((el, i) => makeVisible(el, 150, 40, 130, 150 + i * 48));
+
+    // The overlay starts where the content area starts (320 - 100), not at the rail.
+    expect(contentOffsetLeft(card)).toBe(220);
   });
 
   it("offers several mount targets, ending with the dialog itself", () => {

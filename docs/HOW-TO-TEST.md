@@ -54,16 +54,23 @@ You need:
 2. **No button or badge is added to the page.** Everything lives in DeepSeek's own
    Settings dialog:
    * click your **avatar (bottom-left)** → **Settings**;
-   * the dialog opens with General / Profile / Data / About — **scroll it** and you
-     will find a **“Better DeepSeek”** section holding *all* of the extension's
-     settings: language, chat, prompt & memory, projects, deep research, voice,
-     integrations, utilities and custom CSS, followed by skills, characters,
-     memory, projects, saved items and the command manager;
-   * change anything there — a small *“Saved”* flash confirms it, and the same
-     value is used everywhere in the extension.
+   * the dialog opens on DeepSeek’s own pane and has a **“Better DeepSeek”** row at
+     the bottom of its left-hand rail, exactly like the site’s own General /
+     Profile / Data rows. Click it and **the panel takes over the dialog body**
+     (the site's rail stays usable on the left);
+   * the panel is organised as **categories**: a row of chips at the top — Chat,
+     Language, Injection, Projects, Research, Voice, Integrations, Utilities, CSS
+     for the extension's settings, then Skills, Characters, Memory, Projects,
+     Saved, Commands for its libraries. Pick a chip and a single category fills
+     the body and scrolls on its own; nothing overflows or covers DeepSeek’s own
+     buttons;
+   * clicking any *DeepSeek* row in the rail (General, Profile, …) gives the
+     dialog back to the site — your settings stay saved;
+   * change anything — a small *“Saved”* flash confirms it, and the same value is
+     used everywhere in the extension.
 3. Prefer the old sidebar drawer? Turn on **“Show the floating BDS button”** (the
-   switch at the top of that section) and a corner button appears; clicking it
-   opens the drawer, which shows the very same settings full-height.
+   switch in the panel header) and a corner button appears; clicking it opens the
+   drawer, which shows the very same settings full-height.
 
 ### Quick pass/fail checklist
 
@@ -71,7 +78,8 @@ You need:
 |---|---|---|
 | 1 | No BDS button or badge added anywhere on the page | ✔ |
 | 2 | Avatar → **Settings** opens normally — no freeze, no delay | ✔ |
-| 3 | Scrolling the dialog reveals the **“Better DeepSeek”** section with the full panel | ✔ |
+| 3 | A **“Better DeepSeek”** row sits in the dialog's rail; clicking it shows the panel, clicking a DeepSeek row shows the site again | ✔ |
+| 3b | Category chips switch the body, which scrolls without overflowing the card or covering DeepSeek's buttons | ✔ |
 | 4 | A setting changed there shows *“Saved”* and survives a page reload | ✔ |
 | 5 | The *Show the floating BDS button* switch brings the corner button back, and it opens the drawer | ✔ |
 | 6 | With DeepSeek in **dark mode**, the injected panel follows the dark theme | ✔ |
@@ -132,8 +140,9 @@ Typical fixes:
 | Symptom | Fix |
 |---|---|
 | A small toast appears saying the panel could not attach | That is the extension telling you detection failed instead of staying silent. Run `__BDS_DIAG__.force()` in the console and send the printed output. |
-| No “Better DeepSeek” section in DeepSeek's Settings | Open the console (`F12`), open Settings, and run `__BDS_DIAG__.force()` — it clears the caches and retries immediately, then prints what it sees. If the section still does not appear, send the output of `copy(JSON.stringify(__BDS_DIAG__.dump(), null, 1))` (it lists every dialog, its resolved card, size, controls, rail and mount state) and detection can be pinned to your exact markup. |
+| No “Better DeepSeek” row in the dialog rail | Open the console (`F12`), open Settings, and run `__BDS_DIAG__.force()` — it clears the caches and retries immediately, then prints what it sees. If the row still does not appear, send the output of `copy(JSON.stringify(__BDS_DIAG__.dump(), null, 1))` (it lists every dialog, its resolved card, size, controls, rail and mount state) and detection can be pinned to your exact markup. |
 | The page feels slow or frozen when a dialog opens | Please report it at once with the console open. The scanner is debounced, rate-limited and bounded by design, so the page should never block. |
+| The panel covers DeepSeek's own buttons, or the card shrank | Please send a screenshot — the overlay is sized from the card and should leave the rail and footer usable. |
 | No BDS pill in the corner | Correct — there is none by default. The settings are in DeepSeek's own menu. |
 | Want the old sidebar drawer | Turn on *Show the floating BDS button* inside the panel, or run `__BDS_UI__.openDrawer()` in the console. |
 | Settings reset after removing the extension | Expected: removing an extension deletes its storage. Re-adding starts fresh. |

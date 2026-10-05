@@ -62,7 +62,7 @@ describe("NativeSettingsPanel", () => {
     const { target, cleanup } = renderSvelte(NativeSettingsPanel);
     await flushUi();
 
-    expect(target.querySelector(".bds-ns-title")).not.toBeNull();
+    expect(target.querySelector(".bds-np-title")).not.toBeNull();
     // The full settings panel is mounted inside the host, not a partial copy.
     expect(target.querySelector("#bds-save-settings")).not.toBeNull();
 
@@ -73,7 +73,7 @@ describe("NativeSettingsPanel", () => {
     const { target, cleanup } = renderSvelte(NativeSettingsPanel);
     await flushUi();
 
-    const row = target.querySelector(".bds-ns-floating");
+    const row = target.querySelector(".bds-np-float");
     expect(row).not.toBeNull();
     const input = row.querySelector('input[type="checkbox"]');
     expect(input.checked).toBe(false);
@@ -85,7 +85,7 @@ describe("NativeSettingsPanel", () => {
     const { target, cleanup } = renderSvelte(NativeSettingsPanel);
     await flushUi();
 
-    const input = target.querySelector(".bds-ns-floating input[type='checkbox']");
+    const input = target.querySelector(".bds-np-float input[type='checkbox']");
     input.checked = true;
     input.dispatchEvent(new Event("change", { bubbles: true }));
     await flushUi();
@@ -103,14 +103,64 @@ describe("NativeSettingsPanel", () => {
     expect("lastMountError" in dump).toBe(true);
   });
 
-  it("renders the settings sections the drawer shows", async () => {
+  it("organises everything into categories that fit the dialog", async () => {
     const { target, cleanup } = renderSvelte(NativeSettingsPanel);
     await flushUi();
 
-    const titles = [...target.querySelectorAll(".bds-section-title")].map((el) => el.textContent);
-    // Section headers are drawn from the shared i18n messages; at least the
-    // settings header must be there, which proves SettingsPanel rendered.
-    expect(titles.length).toBeGreaterThan(0);
+    const tabs = [...target.querySelectorAll(".bds-np-tab")].map((el) => el.textContent.trim());
+    // Settings categories plus the drawer's library sections.
+    expect(tabs.length).toBeGreaterThanOrEqual(14);
+    expect(tabs).toContain("Chat & Messages");
+    expect(tabs).toContain("Skill Set");
+
+    // Exactly one category is active, and its content is rendered below the tabs.
+    const active = target.querySelectorAll(".bds-np-tab--active");
+    expect(active.length).toBe(1);
+    expect(target.querySelector(".bds-np-body")).not.toBeNull();
+
+    cleanup();
+  });
+
+  it("shows only the active category's settings section", async () => {
+    const { target, cleanup } = renderSvelte(NativeSettingsPanel);
+    await flushUi();
+
+    // The default category is Chat & Messages: its section is present, others are not.
+    const body = target.querySelector(".bds-np-body");
+    expect(body.querySelector("#bds-max-chat-sessions")).not.toBeNull();
+    expect(body.querySelector("#bds-voice-mode")).toBeNull();
+
+    cleanup();
+  });
+
+  it("switches category when a tab is clicked", async () => {
+    const { target, cleanup } = renderSvelte(NativeSettingsPanel);
+    await flushUi();
+
+    const voiceTab = [...target.querySelectorAll(".bds-np-tab")].find(
+      (el) => el.textContent.trim() === "Voice"
+    );
+    voiceTab.click();
+    await flushUi();
+
+    const body = target.querySelector(".bds-np-body");
+    expect(body.querySelector("#bds-voice-mode")).not.toBeNull();
+    expect(body.querySelector("#bds-max-chat-sessions")).toBeNull();
+
+    cleanup();
+  });
+
+  it("renders the library categories from the drawer", async () => {
+    const { target, cleanup } = renderSvelte(NativeSettingsPanel);
+    await flushUi();
+
+    const tab = [...target.querySelectorAll(".bds-np-tab")].find(
+      (el) => el.textContent.trim() === "Stored Memory"
+    );
+    tab.click();
+    await flushUi();
+
+    expect(target.querySelector(".bds-np-body").textContent.length).toBeGreaterThan(0);
 
     cleanup();
   });

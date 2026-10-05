@@ -75,22 +75,46 @@
 /* ── Toggle Pill ──
    Mirrors DeepSeek's floating chips: elevated surface, hairline border,
    native radius, hover fill — no scale/opacity tricks. */
-/* Host for the settings panel injected into DeepSeek's own Settings dialog.
-   The panel is fitted to the free height at mount time (inline max-height +
-   overflow), so a short dialog scrolls inside this host instead of clipping it. */
+/* The extension's settings view, injected into DeepSeek's own Settings dialog.
+   It covers the dialog's *content* area (the tab rail stays visible and usable),
+   has an opaque surface so the site's page underneath never shows through, and
+   gives the panel a single scrolling region — so the dialog's size never changes
+   with our content and nothing can overflow or overlap. */
 .bds-native-settings-host {
-  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  margin: 12px 0 4px;
+  overflow: hidden;
+  padding: 16px 20px 12px;
+  background: var(--bds-surface);
   color: var(--bds-text-primary);
   font-family: inherit;
 }
 
+.bds-native-settings-host[hidden] {
+  display: none !important;
+}
+
 .bds-native-settings-host > * {
   box-sizing: border-box;
+  min-height: 0;
+}
+
+/* The "Better DeepSeek" entry injected into the site's own tab rail. */
+[data-bds-rail-item] {
+  cursor: pointer;
+}
+
+[data-bds-rail-item].bds-rail-item--active {
+  background: var(--bds-fill-active);
+  color: var(--bds-text-primary);
+  font-weight: var(--ds-font-weight-strong, 600);
 }
 
 #bds-toggle {
@@ -799,6 +823,23 @@ textarea.bds-input,
   border-radius: 50%;
   transition: transform var(--bds-transition);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Compact switch variant used in dense native rows (settings dialog header). */
+.bds-switch--sm .bds-switch-track {
+  width: 28px;
+  height: 16px;
+}
+
+.bds-switch--sm .bds-switch-track::after {
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+}
+
+.bds-switch--sm input:checked + .bds-switch-track::after {
+  transform: translateX(12px);
 }
 
 .bds-switch input:checked + .bds-switch-track::after {

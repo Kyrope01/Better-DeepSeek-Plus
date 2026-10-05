@@ -39,7 +39,7 @@
 
 import { mount, unmount } from "svelte";
 import appState from "../state.js";
-import { i18n } from "../../lib/i18n.svelte.js";
+import { i18n, t } from "../../lib/i18n.svelte.js";
 import NativeSettingsPanel from "./NativeSettingsPanel.svelte";
 
 const HOST_ATTR = "data-bds-native-settings";
@@ -113,6 +113,13 @@ let heartbeat = null;
 let hostEl = null;
 let panelInstance = null;
 let currentDialog = null;
+/** "Better DeepSeek" row injected into the dialog's own tab rail. */
+let railItemEl = null;
+let railEl = null;
+/** Card state saved while our view is shown (restored when it is hidden). */
+let cardOriginal = null;
+/** True while our view covers the dialog's content area. */
+let viewActive = false;
 
 /** Once the panel has been shown in this page session the flag stays set. */
 let everMounted = false;
@@ -610,23 +617,126 @@ function scopeLabelTargets(root) {
 function placementOk(host, card) {
   const rect = host.getBoundingClientRect();
   const cardRect = card.getBoundingClientRect();
-  if (rect.width < 120 || rect.height < 24) return false;
-  if (rect.top > cardRect.bottom - 24) return false;
-  if (rect.bottom < cardRect.top + 24) return false;
-  if (rect.right < cardRect.left + 40 || rect.left > cardRect.right - 40) return false;
+  // The overlay is absolutely positioned inside the card, so it must have a real
+  // area and overlap the card horizontally.
+  if (rect.width < 160 || rect.height < 160) return false;
+  if (rect.right < cardRect.left + 80 || rect.left > cardRect.right - 80) return false;
   return true;
 }
 
-/** Give the host its own scroll if the dialog is too short to show the panel. */
-function fitHost(host, card) {
-  const rect = host.getBoundingClientRect();
-  const cardRect = card.getBoundingClientRect();
-  const available = Math.max(160, cardRect.bottom - rect.top - 12);
-  if (rect.height > available) {
-    host.style.maxHeight = `${Math.round(available)}px`;
-    host.style.overflowY = "auto";
-    host.style.overscrollBehavior = "contain";
+/** The card must be a positioning context for our overlay. */
+function ensureRelative(card) {
+  if (window.getComputedStyle(card).position === "static") {
+    card.style.position = "relative";
   }
+}
+
+/** Where the site's content area starts, relative to the card (right of the rail). */
+function contentOffsetLeft(card) {
+  const rail = findNavRail(card);
+  const cardRect = card.getBoundingClientRect();
+  const column = contentColumn(card, rail);
+  if (column) {
+    const columnRect = column.getBoundingClientRect();
+    const offset = Math.max(0, Math.round(columnRect.left - cardRect.left));
+    if (offset > 0 && offset < cardRect.width - 180) return offset;
+  }
+  if (rail) {
+    const railRect = rail.getBoundingClientRect();
+    const offset = Math.round(railRect.right - cardRect.left + 8);
+    if (offset > 0 && offset < cardRect.width - 180) return offset;
+  }
+  return 0;
+}
+
+/** Position the overlay over the dialog's content area (not over the tab rail). */
+function placeHost(card) {
+  if (!hostEl) return;
+  hostEl.style.left = `${contentOffsetLeft(card)}px`;
+}
+
+/**
+ * When our view is shown the card gets a sensible minimum height, so the panel has
+ * room to breathe; the original inline value is restored when the site's own page
+ * is shown again.
+ */
+function fitCard(card, active) {
+  if (active) {
+    if (!cardOriginal) {
+      cardOriginal = { minHeight: card.style.minHeight, hadAttribute: card.hasAttribute("data-bds-view") };
+    }
+    if (!card.style.minHeight) card.style.minHeight = "min(560px, 78vh)";
+    card.setAttribute("data-bds-view", "bds");
+  } else if (cardOriginal) {
+    card.style.minHeight = cardOriginal.minHeight;
+    cardOriginal = null;
+    card.removeAttribute("data-bds-view");
+  }
+}
+
+/**
+ * Add “Better DeepSeek” to the dialog's own tab rail, cloned from one of the
+ * site's rows so it is styled exactly like General / Profile / Data / About.
+ */
+function injectRailItem(card) {
+  const rail = findNavRail(card);
+  if (!rail) return;
+  railEl = rail;
+
+  if (railItemEl && railItemEl.isConnected && railItemEl.parentElement === rail) return;
+
+  const rows = [...rail.children].filter(
+    (el) => el.nodeType === 1 && !el.hasAttribute("data-bds-rail-item") && el.textContent.trim()
+  );
+  const template = rows[rows.length - 1];
+  if (!template) return;
+
+  const item = template.cloneNode(true);
+  item.setAttribute("data-bds-rail-item", "1");
+  item.removeAttribute("id");
+  // Reuse the template's own markup, swapping only the label text.
+  const labelHost = [...item.querySelectorAll("*")].reverse().find((el) => el.textContent.trim());
+  if (labelHost) labelHost.textContent = t("drawer.title");
+  item.addEventListener("click", (event) => {
+    event.stopPropagation();
+    activateView();
+  });
+
+  rail.appendChild(item);
+  railItemEl = item;
+
+  // Clicking any of the site's own rows must reveal that page again.
+  if (!rail.dataset.bdsRailBound) {
+    rail.dataset.bdsRailBound = "1";
+    rail.addEventListener(
+      "click",
+      (event) => {
+        const target = event.target;
+        if (target instanceof Element && target.closest("[data-bds-rail-item]")) return;
+        showSiteView();
+      },
+      true
+    );
+  }
+}
+
+/** Show the extension's panel over the dialog's content area. */
+function activateView() {
+  if (!hostEl || !currentDialog) return;
+  hostEl.hidden = false;
+  viewActive = true;
+  railItemEl?.classList.add("bds-rail-item--active");
+  placeHost(currentDialog);
+  fitCard(currentDialog, true);
+}
+
+/** Reveal the site's own settings page again (our overlay is hidden, not removed). */
+function showSiteView() {
+  if (!hostEl) return;
+  hostEl.hidden = true;
+  viewActive = false;
+  railItemEl?.classList.remove("bds-rail-item--active");
+  fitCard(currentDialog, false);
 }
 
 /** Mount into the first container that actually lays the panel out. */
@@ -645,54 +755,51 @@ function mountPanel(dialog) {
   state.attempts += 1;
   state.lastAttemptAt = now;
 
-  for (const target of mountTargets(dialog)) {
-    if (!isVisible(target) || target.clientHeight < 60) continue;
+  const card = dialog;
+  ensureRelative(card);
 
-    const host = document.createElement("div");
-    host.className = "bds-native-settings-host";
-    host.setAttribute(HOST_ATTR, "1");
-    target.appendChild(host);
+  // The overlay lives in the card (full height, so a short content column cannot
+  // squeeze it) but starts where the site's content begins, leaving the rail usable.
+  const host = document.createElement("div");
+  host.className = "bds-native-settings-host";
+  host.setAttribute(HOST_ATTR, "1");
+  card.appendChild(host);
 
-    let instance = null;
-    try {
-      const rootNode = target.getRootNode?.();
-      if (rootNode && rootNode !== document && rootNode.host) {
-        // Fire and forget: the styles must be in place before paint.
-        ensureStylesIn(rootNode);
-      }
-      instance = mount(NativeSettingsPanel, { target: host });
-      scopeLabelTargets(host);
-    } catch (err) {
-      lastMountError = err;
-      console.warn("[BDS:native-settings] mount failed:", err);
-      host.remove();
-      continue;
-    }
-
-    if (placementOk(host, dialog)) {
-      fitHost(host, dialog);
-      currentDialog = dialog;
-      dialog.setAttribute(DIALOG_ATTR, "1");
-      hostEl = host;
-      panelInstance = instance;
-      everMounted = true;
-      state.mounted = true;
-      lastMountError = null;
-      // A successful mount resets the budget so tab switches can re-place it.
-      state.attempts = 0;
-      dialogState.set(dialog, state);
-      document.documentElement.setAttribute(PAGE_ATTR, "available");
-      return;
-    }
-
-    // Placement did not lay out inside the card — undo it and try the next one.
-    try {
-      unmount(instance);
-    } catch (_) {
-      // already gone
-    }
+  if (!placementOk(host, card)) {
     host.remove();
+    return;
   }
+
+  let instance = null;
+  try {
+    const rootNode = card.getRootNode?.();
+    if (rootNode && rootNode !== document && rootNode.host) {
+      // The global stylesheet does not cross a shadow boundary.
+      ensureStylesIn(rootNode);
+    }
+    instance = mount(NativeSettingsPanel, { target: host });
+    scopeLabelTargets(host);
+  } catch (err) {
+    lastMountError = err;
+    console.warn("[BDS:native-settings] mount failed:", err);
+    host.remove();
+    return;
+  }
+
+  currentDialog = card;
+  card.setAttribute(DIALOG_ATTR, "1");
+  hostEl = host;
+  panelInstance = instance;
+  everMounted = true;
+  state.mounted = true;
+  state.attempts = 0;
+  dialogState.set(card, state);
+  document.documentElement.setAttribute(PAGE_ATTR, "available");
+
+  placeHost(card);
+  injectRailItem(card);
+  // Shown straight away: the user opened Settings to configure the extension.
+  activateView();
 }
 
 function cleanupPanel() {
@@ -709,9 +816,19 @@ function cleanupPanel() {
     hostEl = null;
   }
   if (currentDialog) {
+    fitCard(currentDialog, false);
     currentDialog.removeAttribute(DIALOG_ATTR);
     currentDialog = null;
   }
+  if (railItemEl) {
+    railItemEl.remove();
+    railItemEl = null;
+  }
+  if (railEl?.dataset?.bdsRailBound) {
+    delete railEl.dataset.bdsRailBound;
+    railEl = null;
+  }
+  viewActive = false;
   if (!everMounted) document.documentElement.removeAttribute(PAGE_ATTR);
 }
 
@@ -757,7 +874,8 @@ function scan() {
   try {
     pruneState();
 
-    // Already mounted and the dialog is still alive → nothing to do.
+    // Already mounted and the dialog is still alive → keep the rail entry alive and
+    // the overlay aligned with the site's content area, then stop.
     if (
       hostEl &&
       hostEl.isConnected &&
@@ -765,6 +883,8 @@ function scan() {
       currentDialog.isConnected &&
       isVisible(currentDialog)
     ) {
+      if (!railItemEl || !railItemEl.isConnected) injectRailItem(currentDialog);
+      if (viewActive) placeHost(currentDialog);
       return;
     }
 
@@ -1131,6 +1251,11 @@ export const __nativeSettingsInternals = {
   looksModalish,
   isDialogRootish,
   placementOk,
+  contentOffsetLeft,
+  injectRailItem,
+  activateView,
+  showSiteView,
+  cleanupPanel,
   summarize,
   diagnostics,
   scan,

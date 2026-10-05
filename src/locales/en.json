@@ -220,7 +220,8 @@
       "deepFetchDepthHint": "How many levels of links Deep Research follows while reading a page (0–5).",
       "showFloatingButton": "Show the floating BDS button",
       "showFloatingButtonHint": "Shows the floating BDS button in the corner of the page. Off by default — every setting is available in DeepSeek's own Settings dialog.",
-      "nativeAttachFailed": "Better DeepSeek could not add its panel to this dialog. Run __BDS_DIAG__.force() in the console (F12) and send the output, or use the extension's sidebar."
+      "nativeAttachFailed": "Better DeepSeek could not add its panel to this dialog. Run __BDS_DIAG__.force() in the console (F12) and send the output, or use the extension's sidebar.",
+      "showFloatingButtonShort": "BDS button"
     },
     "skillList": {
       "title": "Skill Set",

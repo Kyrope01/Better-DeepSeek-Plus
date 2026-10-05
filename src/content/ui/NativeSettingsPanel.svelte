@@ -1,22 +1,19 @@
 <script>
   /**
-   * Better DeepSeek settings rendered INSIDE DeepSeek's own Settings dialog.
+   * Better DeepSeek inside DeepSeek's own Settings dialog.
    *
-   * This is the *whole* settings surface: it mounts the same components the
-   * sidebar drawer uses — SettingsPanel (language, chat, prompt & memory,
-   * projects, deep research, voice, integrations, utilities, custom CSS),
-   * SkillList, CharacterList, MemoryList, projects, SavedItems and the command
-   * manager — so everything the extension can configure is reachable where users
-   * already go to change settings.
+   * This view replaces the dialog's content area (the site's own tab rail gets a
+   * "Better DeepSeek" entry to switch back to it, and clicking any other entry
+   * returns to that page). It is organised as **categories** so everything fits
+   * the dialog instead of being one enormous scroll:
    *
-   * Every component reads and writes `appState.settings` → `chrome.storage`
-   * through the same path as the drawer, so the two surfaces can never drift:
-   * the storage listener refreshes the drawer, and this panel refreshes itself
-   * on `bds:settingsChanged`.
+   *   • Settings categories map to the sections of the shared SettingsPanel
+   *     (`sectionFilter`), which keeps one editor for both surfaces.
+   *   • Library categories mount the very components the drawer uses (skills,
+   *     characters, memory, projects, saved items, commands).
    *
-   * Styling comes from the shared BDS token layer and control kit, which read
-   * the page's own --dsw-* / --dsr-* variables, so the panel is painted exactly
-   * like the dialog hosting it — in light, dark and any user site theme.
+   * Wherever a value is edited, it is written through the same store as the
+   * drawer (`appState.settings` → `chrome.storage`), so both views stay in sync.
    */
   import { onMount } from "svelte";
   import appState from "../state.js";
@@ -34,22 +31,54 @@
 
   const version = getExtensionVersion();
 
+  /** Categories backed by sections of the shared settings editor. */
+  const SETTINGS_CATEGORIES = [
+    { id: "chat", labelKey: "settings.subChat", sections: ["subChat"] },
+    { id: "language", labelKey: "settings.subLanguage", sections: ["subLanguage"] },
+    { id: "prompts", labelKey: "settings.subInjection", sections: ["subInjection"] },
+    { id: "files", labelKey: "settings.subProjects", sections: ["subProjects"] },
+    { id: "research", labelKey: "settings.subResearch", sections: ["subResearch"] },
+    { id: "voice", labelKey: "settings.subVoice", sections: ["subVoice"] },
+    { id: "tools", labelKey: "settings.subIntegrations", sections: ["subIntegrations", "subMcp"] },
+    { id: "utilities", labelKey: "settings.subUtilities", sections: ["subUtilities"] },
+    { id: "css", labelKey: "settings.subCSS", sections: ["subCSS"] },
+  ];
+
+  /** Categories that open one of the drawer's own list components. */
+  const LIBRARY_CATEGORIES = [
+    { id: "skills", labelKey: "skillList.title" },
+    { id: "characters", labelKey: "characterList.title" },
+    { id: "memory", labelKey: "memoryList.title" },
+    { id: "projects", labelKey: "projectsCard.title" },
+    { id: "saved", labelKey: "savedItems.title" },
+    { id: "commands", labelKey: "commands.title" },
+  ];
+
+  const CATEGORIES = [
+    ...SETTINGS_CATEGORIES.map(({ id, labelKey }) => ({ id, labelKey })),
+    ...LIBRARY_CATEGORIES,
+  ];
+
+  let active = $state("chat");
+  let savedFlash = $state(false);
+  let flashTimer = null;
   let settingsRef = $state(null);
   let skillsRef = $state(null);
   let charactersRef = $state(null);
   let memoriesRef = $state(null);
   let savedItemsRef = $state(null);
   let projectsManagerOpen = $state(false);
-  let commandsOpen = $state(false);
-  let savedFlash = $state(false);
+
   let floatingButton = $state(appState.settings.floatingButton === "always");
-  let flashTimer = null;
+
+  const activeSections = $derived(
+    SETTINGS_CATEGORIES.find((category) => category.id === active)?.sections ?? null
+  );
 
   /** Pin (or release) the floating BDS button on the page. */
   function setFloatingButton(value) {
     floatingButton = value;
     appState.settings.floatingButton = value ? "always" : "auto";
-    // appState is not reactive, so the page shell is told explicitly.
     window.dispatchEvent(new CustomEvent("bds:floating-button-changed", { detail: value }));
     try {
       chrome.storage.local.set({
@@ -60,17 +89,11 @@
     }
   }
 
-  /** Open the drawer's full-featured copy (kept for muscle memory and search). */
+  /** The full-height side panel, for anyone who prefers it. */
   function openInSidebar() {
     window.dispatchEvent(new CustomEvent("bds:open-settings"));
   }
 
-  /** The API playground lives in the page shell; ask it to open. */
-  function openApiPlayground() {
-    window.dispatchEvent(new CustomEvent("bds:open-api-playground"));
-  }
-
-  /** Re-pull every list after a data import. */
   function refreshAll() {
     settingsRef?.refresh?.();
     skillsRef?.refresh?.();
@@ -88,7 +111,10 @@
   }
 
   onMount(() => {
-    const onSettingsChanged = () => settingsRef?.refresh?.();
+    const onSettingsChanged = () => {
+      settingsRef?.refresh?.();
+      floatingButton = appState.settings.floatingButton === "always";
+    };
     window.addEventListener("bds:settingsChanged", onSettingsChanged);
     return () => {
       window.removeEventListener("bds:settingsChanged", onSettingsChanged);
@@ -97,149 +123,172 @@
   });
 </script>
 
-<section class="bds-ns" aria-label="Better DeepSeek">
-  <header class="bds-ns-header">
-    <div class="bds-ns-heading">
-      <span class="bds-ns-title">{t("drawer.title")}</span>
-      <span class="bds-ns-version">{t("drawer.version", { version })}</span>
+<div class="bds-native-panel" data-bds-native-panel>
+  <header class="bds-np-header">
+    <div class="bds-np-heading">
+      <span class="bds-np-title">{t("drawer.title")}</span>
+      <span class="bds-np-version">v{version}</span>
       {#if savedFlash}
-        <span class="bds-ns-saved">{t("settings.autoSaved")}</span>
+        <span class="bds-np-saved">{t("settings.autoSaved")}</span>
       {/if}
     </div>
-    <button class="bds-btn-outlined bds-btn-sm" type="button" onclick={openInSidebar}>
+    <label class="bds-np-float" title={t("settings.showFloatingButtonHint")}>
+      <span>{t("settings.showFloatingButtonShort")}</span>
+      <span class="bds-switch bds-switch--sm">
+        <input
+          type="checkbox"
+          checked={floatingButton}
+          onchange={(event) => setFloatingButton(event.currentTarget.checked)}
+        />
+        <span class="bds-switch-track"></span>
+      </span>
+    </label>
+    <button class="bds-btn-text bds-btn-xs" type="button" onclick={openInSidebar}>
       {t("settings.openInSidebar")}
     </button>
   </header>
 
-  <p class="bds-ns-hint">{t("settings.nativeHint")}</p>
+  <nav class="bds-np-tabs" aria-label={t("drawer.title")}>
+    {#each CATEGORIES as category (category.id)}
+      <button
+        type="button"
+        class="bds-np-tab"
+        class:bds-np-tab--active={active === category.id}
+        aria-current={active === category.id ? "page" : undefined}
+        onclick={() => (active = category.id)}
+      >
+        {t(category.labelKey)}
+      </button>
+    {/each}
+  </nav>
 
-  <div class="bds-ns-row bds-ns-floating">
-    <div class="bds-ns-label">
-      <span>{t("settings.showFloatingButton")}</span>
-      <small>{t("settings.showFloatingButtonHint")}</small>
-    </div>
-    <label class="bds-switch">
-      <input
-        type="checkbox"
-        checked={floatingButton}
-        onchange={(event) => setFloatingButton(event.currentTarget.checked)}
+  <div class="bds-np-body">
+    {#if activeSections}
+      <SettingsPanel
+        bind:this={settingsRef}
+        sectionFilter={activeSections}
+        onapiplayground={() => window.dispatchEvent(new CustomEvent("bds:open-api-playground"))}
+        onimportdata={refreshAll}
+        onsave={handleSaved}
       />
-      <span class="bds-switch-track"></span>
-    </label>
+    {:else if active === "skills"}
+      <SkillList bind:this={skillsRef} />
+    {:else if active === "characters"}
+      <CharacterList bind:this={charactersRef} />
+    {:else if active === "memory"}
+      <MemoryList bind:this={memoriesRef} />
+    {:else if active === "projects"}
+      {#if projectsManagerOpen}
+        <ProjectsManager onback={() => (projectsManagerOpen = false)} />
+      {:else}
+        <ProjectsCard onmanage={() => (projectsManagerOpen = true)} />
+      {/if}
+    {:else if active === "saved"}
+      <SavedItems bind:this={savedItemsRef} />
+    {:else if active === "commands"}
+      <CommandManager onClose={() => (active = "chat")} />
+    {/if}
   </div>
-</section>
-
-<!-- ── Full settings: identical to the sidebar drawer ── -->
-<div class="bds-ns-panel">
-  <SettingsPanel
-    bind:this={settingsRef}
-    onapiplayground={openApiPlayground}
-    onimportdata={refreshAll}
-    onsave={handleSaved}
-  />
 </div>
 
-<hr class="bds-ns-sep" />
-
-<!-- ── Skills ── -->
-<SkillList bind:this={skillsRef} />
-
-<hr class="bds-ns-sep" />
-
-<!-- ── Characters ── -->
-<CharacterList bind:this={charactersRef} />
-
-<hr class="bds-ns-sep" />
-
-<!-- ── Memory ── -->
-<MemoryList bind:this={memoriesRef} />
-
-<hr class="bds-ns-sep" />
-
-<!-- ── Projects ── -->
-{#if projectsManagerOpen}
-  <ProjectsManager onback={() => (projectsManagerOpen = false)} />
-{:else}
-  <ProjectsCard onmanage={() => (projectsManagerOpen = true)} />
-{/if}
-
-<hr class="bds-ns-sep" />
-
-<!-- ── Saved items / snippets / import & export ── -->
-<SavedItems bind:this={savedItemsRef} />
-
-<hr class="bds-ns-sep" />
-
-<!-- ── Commands ── -->
-{#if commandsOpen}
-  <CommandManager onClose={() => (commandsOpen = false)} />
-{:else}
-  <button type="button" class="bds-btn-outlined bds-btn-sm" onclick={() => (commandsOpen = true)}>
-    {t("commands.manage")}
-  </button>
-{/if}
-
 <style>
-  .bds-ns {
-    display: block;
-    padding: 4px 0 8px;
+  .bds-native-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
     color: var(--bds-text-primary);
-    font-size: var(--bds-font-size-m);
-    line-height: var(--bds-line-height-m);
+    font-family: inherit;
   }
 
-  .bds-ns-header {
+  .bds-np-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 4px 0 8px;
+    gap: 10px;
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--bds-divider);
+    flex: none;
   }
 
-  .bds-ns-heading {
+  .bds-np-heading {
     display: flex;
     align-items: baseline;
-    gap: 8px;
+    gap: 6px;
     min-width: 0;
+    flex: 1 1 auto;
   }
 
-  .bds-ns-title {
+  .bds-np-title {
     font-size: var(--bds-font-size-l);
     line-height: 24px;
     font-weight: var(--ds-font-weight-strong, 600);
     color: var(--bds-text-strong);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .bds-ns-version,
-  .bds-ns-saved {
+  .bds-np-version,
+  .bds-np-saved {
     font-size: var(--bds-font-size-s);
     color: var(--bds-text-tertiary);
+    white-space: nowrap;
   }
 
-  .bds-ns-hint {
-    margin: 0 0 4px;
-    font-size: var(--bds-font-size-s);
-    line-height: 18px;
-    color: var(--bds-text-tertiary);
-  }
-
-  .bds-ns-floating {
-    display: flex;
+  .bds-np-float {
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 8px 0 4px;
+    gap: 6px;
+    flex: none;
+    font-size: var(--bds-font-size-s);
+    color: var(--bds-text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
   }
 
-  .bds-ns-panel {
-    display: block;
-    padding-top: 8px;
+  /* Category chips: as many rows as needed, never wider than the dialog. */
+  .bds-np-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 0;
+    flex: none;
   }
 
-  .bds-ns-sep {
-    height: 1px;
-    margin: 20px 0;
-    border: 0;
-    background: var(--bds-divider);
+  .bds-np-tab {
+    height: 26px;
+    padding: 0 10px;
+    border: 1px solid var(--bds-border);
+    border-radius: var(--bds-radius-md);
+    background: transparent;
+    color: var(--bds-text-secondary);
+    font-family: inherit;
+    font-size: var(--bds-font-size-s);
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color var(--bds-transition), color var(--bds-transition),
+      border-color var(--bds-transition);
+    white-space: nowrap;
+  }
+
+  .bds-np-tab:hover {
+    background: var(--bds-fill-hover);
+    color: var(--bds-text-primary);
+  }
+
+  .bds-np-tab--active {
+    background: var(--bds-fill-active);
+    border-color: transparent;
+    color: var(--bds-text-primary);
+    font-weight: var(--ds-font-weight-strong, 600);
+  }
+
+  /* The one scrolling region: the dialog size never changes with the content. */
+  .bds-np-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 2px 2px 8px 0;
   }
 </style>

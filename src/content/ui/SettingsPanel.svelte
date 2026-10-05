@@ -19,7 +19,7 @@
   import SnippetList from "./SnippetList.svelte";
   import { collapseAllOpenReasoningBlocks, expandAllCollapsedReasoningBlocks } from "../message-processor.svelte.js";
 
-  let { onapiplayground, onimportdata, onsave } = $props();
+  let { onapiplayground, onimportdata, onsave, sectionFilter = null } = $props();
 
   let customSystemPrompts = $state(appState.settings.customSystemPrompts || []);
   let activeSystemPromptId = $state(appState.settings.activeSystemPromptId || "default");
@@ -868,6 +868,9 @@
   });
 
   function isSectionMatch(sectionKey) {
+    // `sectionFilter` lets a host (DeepSeek's own Settings dialog) show one
+    // category at a time; without it every section renders, as in the drawer.
+    if (sectionFilter && !sectionFilter.includes(sectionKey)) return false;
     if (!searchActive) return true;
     return filteredSearchSections?.some(s => s.sectionKey === sectionKey) ?? false;
   }
