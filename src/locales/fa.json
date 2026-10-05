@@ -216,7 +216,9 @@
       "nativeHint": "همه تنطیمات Better DeepSeek در همین صفحه است. همین تنطیمات در نوار کناری (دکمه BDS) نیز هست.",
       "openInSidebar": "باز کردن در نوار کناری",
       "deepFetchDepth": "عمق واکشی جستجوی وب",
-      "deepFetchDepthHint": "مقدار سطوح پیوندهایی که Deep Research هنگام خواندن یک صفحه دنبال می‌کند (۰–۵)."
+      "deepFetchDepthHint": "مقدار سطوح پیوندهایی که Deep Research هنگام خواندن یک صفحه دنبال می‌کند (۰–۵).",
+      "showFloatingButton": "نمایش دکمه شناور BDS",
+"showFloatingButtonHint": "دکمه گوشه را نشان می‌دهد. اگر خاموش کنید، تا زمانی که این تنطیمات در منوی DeepSeek در دسترس است پنهان می‌شود."
     },
     "skillList": {
       "title": "مجموعه مهارت",
@@ -828,7 +830,8 @@
       "tags": "برچسب‌ها (BDS)",
       "exportChat": "خروجی گفتگو (BDS)",
       "getBdsApp": "دریافت برنامه BDS",
-      "whatsNew": "چه چیز جدید است؟"
+      "whatsNew": "چه چیز جدید است؟",
+      "bdsSettings": "تنطیمات BDS"
     },
     "savedItems": {
       "title": "موارد ذخیره‌شده",

@@ -217,7 +217,9 @@
       "nativeHint": "Все настройки Better DeepSeek собраны на этой странице. Те же настройки доступны и на боковой панели (кнопка BDS).",
       "openInSidebar": "Открыть в боковой панели",
       "deepFetchDepth": "Глубина загрузки веб-страниц",
-      "deepFetchDepthHint": "Сколько уровней ссылок проходит Deep Research при чтении страницы (0–5)."
+      "deepFetchDepthHint": "Сколько уровней ссылок проходит Deep Research при чтении страницы (0–5).",
+      "showFloatingButton": "Показывать плавающую кнопку BDS",
+"showFloatingButtonHint": "Оставляет кнопку в углу. Если выключить, кнопка скрывается, пока эти настройки доступны в меню DeepSeek."
     },
     "skillList": {
       "title": "Набор навыков",
@@ -862,7 +864,8 @@
       "tags": "Теги (BDS)",
       "exportChat": "Экспорт чата (BDS)",
       "getBdsApp": "Получить BDS App",
-      "whatsNew": "Что нового?"
+      "whatsNew": "Что нового?",
+      "bdsSettings": "BDS Настройки"
     },
     "commands": {
       "title": "Команды",

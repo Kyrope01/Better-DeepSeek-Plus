@@ -27,6 +27,7 @@
   import ProjectsCard from "./ProjectsCard.svelte";
   import ProjectsManager from "./ProjectsManager.svelte";
   import CommandManager from "../commands/CommandManager.svelte";
+  import { STORAGE_KEYS } from "../../lib/constants.js";
   import { t } from "../../lib/i18n.svelte.js";
   import { getExtensionVersion } from "../../lib/extension-version.js";
 
@@ -40,7 +41,21 @@
   let projectsManagerOpen = $state(false);
   let commandsOpen = $state(false);
   let savedFlash = $state(false);
+  let floatingButton = $state(appState.settings.floatingButton === "always");
   let flashTimer = null;
+
+  /** Pin (or release) the floating BDS button on the page. */
+  function setFloatingButton(value) {
+    floatingButton = value;
+    appState.settings.floatingButton = value ? "always" : "auto";
+    try {
+      chrome.storage.local.set({
+        [STORAGE_KEYS.settings]: JSON.parse(JSON.stringify(appState.settings)),
+      });
+    } catch (_) {
+      // storage unavailable in some embedded contexts; the in-memory flag still applies
+    }
+  }
 
   /** Open the drawer's full-featured copy (kept for muscle memory and search). */
   function openInSidebar() {
@@ -94,6 +109,21 @@
   </header>
 
   <p class="bds-ns-hint">{t("settings.nativeHint")}</p>
+
+  <div class="bds-ns-row bds-ns-floating">
+    <div class="bds-ns-label">
+      <span>{t("settings.showFloatingButton")}</span>
+      <small>{t("settings.showFloatingButtonHint")}</small>
+    </div>
+    <label class="bds-switch">
+      <input
+        type="checkbox"
+        checked={floatingButton}
+        onchange={(event) => setFloatingButton(event.currentTarget.checked)}
+      />
+      <span class="bds-switch-track"></span>
+    </label>
+  </div>
 </section>
 
 <!-- ── Full settings: identical to the sidebar drawer ── -->
@@ -188,6 +218,11 @@
     font-size: var(--bds-font-size-s);
     line-height: 18px;
     color: var(--bds-text-tertiary);
+  }
+
+  .bds-ns-floating {
+    padding: 8px 0 4px;
+    border-bottom: none;
   }
 
   .bds-ns-panel {

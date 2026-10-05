@@ -217,7 +217,9 @@
       "nativeHint": "Tüm Better DeepSeek ayarları bu sayfada. Aynı ayarlar kenar çubuğunda (BDS düğmesi) da bulunur.",
       "openInSidebar": "Kenar çubuğunda aç",
       "deepFetchDepth": "Web arama getirme derinliği",
-      "deepFetchDepthHint": "Deep Research bir sayfayı okurken kaç bağlantı seviyesi takip eder (0–5)."
+      "deepFetchDepthHint": "Deep Research bir sayfayı okurken kaç bağlantı seviyesi takip eder (0–5).",
+      "showFloatingButton": "Yüzen BDS düğmesini göster",
+"showFloatingButtonHint": "Köşedeki düğmeyi görünür tutar. Kapatırsanız, bu ayarlar DeepSeek'in kendi menüsünden açılabildiği sürece düğme gizlenir."
     },
     "skillList": {
       "title": "Yetenek Seti",
@@ -862,7 +864,8 @@
       "tags": "Etiketler (BDS)",
       "exportChat": "Sohbeti Dışa Aktar (BDS)",
       "getBdsApp": "BDS Uygulamasını İndir",
-      "whatsNew": "Neler Yeni?"
+      "whatsNew": "Neler Yeni?",
+      "bdsSettings": "BDS Ayarları"
     },
     "commands": {
       "title": "Komutlar",

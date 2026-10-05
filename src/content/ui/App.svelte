@@ -224,6 +224,18 @@
     openLiveMode();
   });
 
+  // Floating button policy: "always" pins it, "auto" (default) lets it step aside
+  // once the settings bridge is live inside DeepSeek's own Settings dialog — see
+  // the html[data-bds-native-settings] rule in content.css.
+  $effect(() => {
+    const mode = appState.settings.floatingButton === "always" ? "always" : "auto";
+    if (mode === "always") {
+      document.documentElement.setAttribute("data-bds-floating-button", "always");
+    } else {
+      document.documentElement.removeAttribute("data-bds-floating-button");
+    }
+  });
+
   // The panel inside DeepSeek's own Settings dialog can ask for the page's
   // API playground (a page-level surface, not a drawer section).
   window.addEventListener("bds:open-api-playground", () => {

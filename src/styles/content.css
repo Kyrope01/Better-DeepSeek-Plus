@@ -75,6 +75,14 @@
 /* ── Toggle Pill ──
    Mirrors DeepSeek's floating chips: elevated surface, hairline border,
    native radius, hover fill — no scale/opacity tricks. */
+/* The floating button is the fallback entrance, not the front door: once the
+   extension's settings are live inside DeepSeek's own Settings dialog, it steps
+   aside. `data-bds-native-settings-ready` is set by native-settings.js; the user can
+   pin the button back with the "always" setting. */
+html[data-bds-native-settings-ready]:not([data-bds-floating-button="always"]) #bds-toggle {
+  display: none !important;
+}
+
 #bds-toggle {
   display: inline-flex;
   align-items: center;

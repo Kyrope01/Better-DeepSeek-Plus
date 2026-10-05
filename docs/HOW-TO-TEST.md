@@ -52,7 +52,12 @@ You need:
 1. Open <https://chat.deepseek.com> and sign in. **Reload the page once** after
    installing, so the content script can attach.
 2. After a second you should see a small **“BDS” pill in the top-right corner**
-   of the page. Hovering shows *“Better DeepSeek — open settings”*.
+   of the page. Hovering shows *“Better DeepSeek — open settings”*. The pill is a
+   **fallback**: it hides itself as soon as the extension's settings are live
+   inside DeepSeek's own Settings dialog (and comes back if they are not). Turn on
+   *Show the floating BDS button* in the panel to pin it permanently. The
+   **account menu also has a “BDS Settings” entry** (under DeepSeek's *Settings*)
+   that leads to the same place.
    * Click it → the **sidebar drawer** slides in. This is the extension's full
    settings (language, chat, prompt & memory, deep research, voice,
    integrations, utilities, custom CSS).
@@ -72,7 +77,8 @@ You need:
 
 | # | Check | Expected |
 |---|---|---|
-| 1 | BDS pill visible, top-right, 34 px pill | ✔ |
+| 1 | BDS pill visible, top-right, 34 px pill (until the dialog panel is live) | ✔ |
+| 1b | Account menu (avatar) shows a **BDS Settings** entry right below DeepSeek's *Settings* | ✔ |
 | 2 | Drawer opens and looks like DeepSeek's own panel (same font, radius, colours) | ✔ |
 | 3 | Drawer closes (toggle, ✕, outside click, `Esc`) | ✔ |
 | 4 | “Better DeepSeek” section appears inside DeepSeek's Settings dialog and contains the full settings panel (scroll to the bottom of the dialog) | ✔ |
@@ -138,7 +144,7 @@ Typical fixes:
 |---|---|
 | No BDS pill at all | Reload the DeepSeek tab; make sure the extension card is enabled and has no errors; check you are on `chat.deepseek.com` (not the marketing site). |
 | Pill gone after changing code | Press the reload icon on the extension card, then refresh the tab. |
-| No “Better DeepSeek” section in DeepSeek's Settings | DeepSeek may have changed its dialog markup. Note what the dialog looks like (screenshot) — the detector is designed to be adjusted. |
+| No “Better DeepSeek” section in DeepSeek's Settings | DeepSeek may have changed its dialog markup. Open the Console (`F12`) — the extension logs `[BDS:native-settings] a dialog is open but was not recognised…`. Then paste `copy(JSON.stringify(__BDS_DIAG__.dump(), null, 1))` while the dialog is open and share the result; detection is data-driven from that dump. |
 | Settings reset after removing the extension | Expected: removing an extension deletes its storage. Re-adding starts fresh. |
 | Extension visible in an incognito window | You must enable “Allow in Incognito” on the extension card. |
 
