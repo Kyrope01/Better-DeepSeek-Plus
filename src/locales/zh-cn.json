@@ -218,7 +218,8 @@
       "deepFetchDepth": "网页抓取深度",
       "deepFetchDepthHint": "深度研究读取网页时跟随链接的层级数（0–5）。",
       "showFloatingButton": "显示悬浮的 BDS 按钮",
-      "showFloatingButtonHint": "在页面右上角显示悬浮的 BDS 按钮。默认关闭——所有设置均可在 DeepSeek 自己的设置窗口中找到。"
+      "showFloatingButtonHint": "在页面右上角显示悬浮的 BDS 按钮。默认关闭——所有设置均可在 DeepSeek 自己的设置窗口中找到。",
+      "nativeAttachFailed": "Better DeepSeek 无法将面板添加到此窗口。请在控制台（F12）运行 __BDS_DIAG__.force() 并发送输出，或使用扩展的侧边栏。"
     },
     "skillList": {
       "title": "技能集",

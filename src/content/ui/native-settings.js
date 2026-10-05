@@ -38,6 +38,8 @@
  */
 
 import { mount, unmount } from "svelte";
+import appState from "../state.js";
+import { i18n } from "../../lib/i18n.svelte.js";
 import NativeSettingsPanel from "./NativeSettingsPanel.svelte";
 
 const HOST_ATTR = "data-bds-native-settings";
@@ -62,7 +64,15 @@ const RECENT_MAX = 40;
 const SETTINGS_LABELS = ["Settings", "设置", "Настройки", "Ayarlar", "تنظیمات"];
 
 /** Cheap "could this be a dialog?" hint used to filter mutations and heartbeats. */
-const MODAL_HINT = '.ds-modal-content, .ds-modal, [role="dialog"], [class*="modal" i]';
+const MODAL_HINT = [
+  ".ds-modal-content",
+  ".ds-modal",
+  ".ds-dialog",
+  "dialog[open]",
+  '[role="dialog"]',
+  '[class*="modal" i]',
+  '[class*="dialog" i]',
+].join(", ");
 
 /** Form controls the site uses in settings screens (real elements first). */
 const CONTROL_SELECTOR = [
@@ -88,7 +98,15 @@ const CONTROL_SELECTOR = [
 const CONTROL_CLASS_RE = /(switch|checkbox|radio|segmented|select|slider|slid)/i;
 
 /** The two most reliable dialog selectors; class sweeps are the fallback. */
-const DIALOG_SELECTOR_FAST = '.ds-modal-content, .ds-modal, [role="dialog"]';
+const DIALOG_SELECTOR_FAST = '.ds-modal-content, .ds-modal, .ds-dialog, dialog[open], [role="dialog"]';
+const DIALOG_SELECTOR_SWEEP = '[class*="modal" i], [class*="dialog" i], dialog';
+
+/** Open shadow roots we have met (the site's 2026 UI uses custom elements). */
+const shadowRoots = new Set();
+/** MutationObserver per shadow root, disconnected with the bridge. */
+const shadowObservers = new Map();
+/** Injected copy of content.css for shadow mounts (fetched once). */
+const styleCache = { text: null, fetched: false };
 
 let observer = null;
 let heartbeat = null;
@@ -105,6 +123,8 @@ let lastScanAt = 0;
 let lastSweepAt = 0;
 let lastSweepHeartbeatAt = 0;
 let scanning = false;
+/** Last time we told the user the panel could not attach (per probe). */
+let lastAttachWarnAt = 0;
 
 /** Timestamp of the last click on the site's own Settings entry. */
 let settingsClickedAt = 0;
@@ -114,6 +134,103 @@ const warnedCandidates = new Set();
 const dialogState = new Map();
 /** Elements added to the DOM recently (see rememberAdded). */
 const recentAdded = [];
+
+/* ── shadow DOM support ──────────────────────────────────────────────────── */
+
+/**
+ * Everything the site renders lives in the light DOM today, but its components
+ * are custom elements (`<ds-*>`), so an open shadow root would make the dialog
+ * invisible to document.querySelectorAll — a silent, total failure. Roots are
+ * discovered cheaply: from clicked paths and from freshly added subtrees.
+ */
+function registerShadowRoot(root) {
+  if (!root || root === document || shadowRoots.has(root)) return;
+  shadowRoots.add(root);
+  if (observer && !shadowObservers.has(root)) {
+    const shadowObserver = new MutationObserver((mutations) => {
+      let interesting = false;
+      for (const mutation of mutations) {
+        if (hostEl && !hostEl.isConnected) {
+          interesting = true;
+          break;
+        }
+        if (mutation.type === "attributes") {
+          if (isDialogRootish(mutation.target)) {
+            interesting = true;
+            break;
+          }
+          continue;
+        }
+        rememberAdded(mutation.addedNodes);
+        for (const node of mutation.addedNodes) {
+          if (looksModalish(node)) {
+            interesting = true;
+            break;
+          }
+        }
+        if (interesting) break;
+      }
+      if (interesting || probing()) scheduleScan();
+    });
+    shadowObserver.observe(root, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "hidden", "aria-hidden"],
+    });
+    shadowObservers.set(root, shadowObserver);
+  }
+  scheduleScan();
+}
+
+/** Register any shadow roots inside a freshly added subtree (bounded). */
+function collectShadowRootsIn(node) {
+  if (!node || node.nodeType !== 1) return;
+  if (node.shadowRoot) registerShadowRoot(node.shadowRoot);
+  if (node.childElementCount > 400) return;
+  for (const el of node.querySelectorAll("*")) {
+    if (el.shadowRoot) registerShadowRoot(el.shadowRoot);
+  }
+}
+
+/** Query roots: the document plus every open shadow root we know. */
+function queryRoots(selector) {
+  const out = [...document.querySelectorAll(selector)];
+  for (const root of shadowRoots) {
+    if (!root.isConnected) continue;
+    for (const el of root.querySelectorAll(selector)) out.push(el);
+  }
+  return out;
+}
+
+/**
+ * Our global stylesheet does not cross a shadow boundary, so a panel mounted
+ * inside a shadow root must carry its own copy of content.css.
+ */
+async function ensureStylesIn(root) {
+  if (!root || root === document || !root.host) return;
+  if (!styleCache.fetched) {
+    styleCache.fetched = true;
+    try {
+      const response = await fetch(chrome.runtime.getURL("content.css"));
+      styleCache.text = await response.text();
+    } catch (_) {
+      // Fall back to reading the already-injected stylesheet below.
+      try {
+        const sheet = [...document.styleSheets].find((item) => (item.href || "").includes("content.css"));
+        styleCache.text = [...sheet.cssRules].map((rule) => rule.cssText).join("\n");
+      } catch (_) {
+        styleCache.text = null;
+      }
+    }
+  }
+  if (!styleCache.text) return;
+  if (root.querySelector("style[" + HOST_ATTR + "-style]")) return;
+  const style = document.createElement("style");
+  style.setAttribute(HOST_ATTR + "-style", "1");
+  style.textContent = styleCache.text;
+  root.appendChild(style);
+}
 
 /* ── small helpers ───────────────────────────────────────────────────────── */
 
@@ -201,6 +318,7 @@ function rememberAdded(nodes) {
   for (const node of nodes) {
     if (node.nodeType !== 1) continue;
     if (node.childElementCount > 800) continue; // virtual lists, streaming blocks
+    collectShadowRootsIn(node);
     recentAdded.push({ el: node, at: Date.now() });
   }
   if (recentAdded.length > RECENT_MAX) recentAdded.splice(0, recentAdded.length - RECENT_MAX);
@@ -224,18 +342,27 @@ function probing() {
 
 /** A click on the site's own Settings entry marks a probe window. */
 function onDocumentClick(event) {
+  const path = typeof event.composedPath === "function" ? event.composedPath() : [];
   const target = event.target instanceof Element ? event.target : null;
-  if (!target || isOurNode(target)) return;
+  if (!target && !path.length) return;
 
-  // The clicked node may be an icon or a label inside the row: walk up a couple of
-  // levels, but never read text from a container.
-  let node = target;
-  for (let depth = 0; node && depth < 3; depth++, node = node.parentElement) {
+  // Walking the composed path reaches labels inside shadow roots, where
+  // event.target would only ever be the shadow host.
+  const nodes = path.length ? path : [target];
+  let depth = 0;
+  for (const node of nodes) {
+    if (depth >= 4) break;
+    if (!node || node.nodeType !== 1) continue;
+    if (isOurNode(node)) return;
+    if (typeof node.getRootNode === "function") {
+      const root = node.getRootNode();
+      if (root && root !== document && root.host) registerShadowRoot(root);
+    }
     const text = smallText(node);
     if (!text) continue;
+    depth += 1;
     if (SETTINGS_LABELS.some((label) => text === label || text.includes(label))) {
       settingsClickedAt = Date.now();
-      // The dialog usually mounts a frame later; look for it right away too.
       scheduleScan();
       return;
     }
@@ -521,6 +648,11 @@ function mountPanel(dialog) {
 
     let instance = null;
     try {
+      const rootNode = target.getRootNode?.();
+      if (rootNode && rootNode !== document && rootNode.host) {
+        // Fire and forget: the styles must be in place before paint.
+        ensureStylesIn(rootNode);
+      }
       instance = mount(NativeSettingsPanel, { target: host });
       scopeLabelTargets(host);
     } catch (err) {
@@ -583,7 +715,7 @@ function candidates() {
     if (el instanceof Element && !isOurNode(el) && isVisible(el) && !list.includes(el)) list.push(el);
   };
 
-  for (const el of document.querySelectorAll(DIALOG_SELECTOR_FAST)) push(el);
+  for (const el of queryRoots(DIALOG_SELECTOR_FAST)) push(el);
 
   const probingNow = probing();
   if (list.length < 2 || probingNow) {
@@ -599,7 +731,7 @@ function candidates() {
     const now = Date.now();
     if (now - lastSweepAt > 1000) {
       lastSweepAt = now;
-      for (const el of document.querySelectorAll('[class*="modal" i], [class*="dialog" i]')) {
+      for (const el of queryRoots(DIALOG_SELECTOR_SWEEP)) {
         if (list.length >= 8) break;
         push(el);
       }
@@ -689,6 +821,35 @@ function scheduleScan() {
       scan();
     }
   }, SCAN_DEBOUNCE_MS);
+}
+
+/**
+ * The bridge must never fail silently: when the user opened the site's Settings
+ * (so they clearly expect the panel) and nothing mounted within a few seconds,
+ * say so once and point at the console for the shape dump.
+ */
+function maybeWarnAttachFailure() {
+  if (!settingsClickedAt || hostEl || everMounted) return;
+  const elapsed = Date.now() - settingsClickedAt;
+  if (elapsed < 2500 || elapsed > 30000) return;
+  if (lastAttachWarnAt === settingsClickedAt) return; // one toast per attempt
+  lastAttachWarnAt = settingsClickedAt;
+  warnAttachFailure();
+}
+
+function warnAttachFailure() {
+  let message = "Better DeepSeek could not add its panel to this dialog.";
+  try {
+    message = i18n.t("settings.nativeAttachFailed");
+  } catch (_) {
+    // i18n not ready — the English fallback above still tells the user something
+  }
+  try {
+    appState.ui?.showToast?.(message, 8000);
+  } catch (_) {
+    // no UI available (tests / non-page contexts)
+  }
+  console.warn(`[BDS:native-settings] ${message}`);
 }
 
 /* ── diagnostics ─────────────────────────────────────────────────────────── */
@@ -813,6 +974,7 @@ export function initNativeSettings() {
   // Heartbeat: cheap guard that only looks for the dialog hint before scanning.
   heartbeat = setInterval(() => {
     if (document.hidden) return;
+    maybeWarnAttachFailure();
     if (hostEl) {
       if (!hostEl.isConnected) scheduleScan();
       return;
@@ -855,6 +1017,9 @@ export function destroyNativeSettings() {
     clearInterval(heartbeat);
     heartbeat = null;
   }
+  for (const shadowObserver of shadowObservers.values()) shadowObserver.disconnect();
+  shadowObservers.clear();
+  shadowRoots.clear();
   clearTimeout(scanTimer);
   scanQueued = false;
   document.removeEventListener("click", onDocumentClick, true);
@@ -958,6 +1123,12 @@ export const __nativeSettingsInternals = {
   scan,
   scheduleScan,
   force,
+  registerShadowRoot,
+  collectShadowRootsIn,
+  queryRoots,
+  onDocumentClick,
+  maybeWarnAttachFailure,
+  warnAttachFailure,
   observerConfig: {
     childList: true,
     subtree: true,

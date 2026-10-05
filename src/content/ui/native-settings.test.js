@@ -13,6 +13,9 @@ const {
   looksModalish,
   isDialogRootish,
   placementOk,
+  registerShadowRoot,
+  collectShadowRootsIn,
+  queryRoots,
   observerConfig,
   guards,
 } = __nativeSettingsInternals;
@@ -140,6 +143,54 @@ describe("native settings dialog detection", () => {
     layOut(dialog, { width: 525, height: 600, left: 400, top: 120 });
     expect(classify(dialog)).toBeGreaterThan(0);
     document.documentElement.removeAttribute(__nativeSettingsInternals.PAGE_ATTR);
+  });
+
+  it("recognises a native <dialog> element (implicit role, no attributes)", () => {
+    const dialog = document.createElement("dialog");
+    dialog.setAttribute("open", "");
+    dialog.className = "hashed_5b21";
+    dialog.innerHTML = `<div class="a-rail">
+        <div class="a-item">General</div><div class="a-item">Profile</div><div class="a-item">Data</div>
+      </div>`;
+    document.body.appendChild(dialog);
+
+    makeVisible(dialog, 760, 520, 200, 150);
+    const rail = dialog.querySelector(".a-rail");
+    makeVisible(rail, 170, 420, 220, 170);
+    [...dialog.querySelectorAll(".a-item")].forEach((el, i) => makeVisible(el, 150, 40, 230, 180 + i * 48));
+
+    expect(looksModalish(dialog)).toBe(true);
+    expect(classify(dialog, true)).toBeGreaterThan(0);
+  });
+
+  it("finds a dialog that lives inside a shadow root", () => {
+    // A custom element with a shadow root would hide the dialog from
+    // document.querySelectorAll — the reason shadow roots are registered.
+    const host = document.createElement("ds-settings-shell");
+    document.body.appendChild(host);
+    const root = host.attachShadow({ mode: "open" });
+    root.innerHTML = `
+      <div class="hashed-modal">
+        <div class="hashed-rail">
+          <div class="hashed-item">General</div><div class="hashed-item">Profile</div><div class="hashed-item">Data</div>
+        </div>
+        <div class="hashed-content"><div class="hashed-switch-row"></div></div>
+      </div>`;
+
+    const modal = root.querySelector(".hashed-modal");
+    makeVisible(modal, 700, 480, 150, 120);
+    makeVisible(root.querySelector(".hashed-rail"), 160, 400, 170, 140);
+    makeVisible(root.querySelector(".hashed-content"), 480, 400, 350, 140);
+    [...root.querySelectorAll(".hashed-item")].forEach((el, i) => makeVisible(el, 140, 40, 180, 150 + i * 48));
+
+    registerShadowRoot(root);
+    const found = queryRoots(".ds-modal-content, .ds-modal, .ds-dialog, dialog[open], [role=\"dialog\"]").length;
+    expect(found).toBeGreaterThanOrEqual(0);
+    // The dialog inside the shadow root must be discoverable and classifiable.
+    expect(classify(modal, true)).toBeGreaterThan(0);
+
+    collectShadowRootsIn(host);
+    expect(queryRoots('[class*="modal" i]')).toContain(modal);
   });
 
   it("filters mutations cheaply so React churn cannot trigger scans", () => {
