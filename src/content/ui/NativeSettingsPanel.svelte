@@ -19,6 +19,7 @@
    * like the dialog hosting it — in light, dark and any user site theme.
    */
   import { onMount } from "svelte";
+  import appState from "../state.js";
   import SettingsPanel from "./SettingsPanel.svelte";
   import SkillList from "./SkillList.svelte";
   import CharacterList from "./CharacterList.svelte";

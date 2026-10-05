@@ -125,6 +125,13 @@ let lastSweepHeartbeatAt = 0;
 let scanning = false;
 /** Last time we told the user the panel could not attach (per probe). */
 let lastAttachWarnAt = 0;
+/**
+ * The most recent mount failure. Kept because a mount error (a missing import in
+ * the panel, say) is otherwise only visible in chrome://extensions → Errors —
+ * which cost real debugging rounds once. It is reported in the toast log and in
+ * __BDS_DIAG__.dump().
+ */
+let lastMountError = null;
 
 /** Timestamp of the last click on the site's own Settings entry. */
 let settingsClickedAt = 0;
@@ -656,6 +663,7 @@ function mountPanel(dialog) {
       instance = mount(NativeSettingsPanel, { target: host });
       scopeLabelTargets(host);
     } catch (err) {
+      lastMountError = err;
       console.warn("[BDS:native-settings] mount failed:", err);
       host.remove();
       continue;
@@ -669,6 +677,7 @@ function mountPanel(dialog) {
       panelInstance = instance;
       everMounted = true;
       state.mounted = true;
+      lastMountError = null;
       // A successful mount resets the budget so tab switches can re-place it.
       state.attempts = 0;
       dialogState.set(dialog, state);
@@ -849,7 +858,10 @@ function warnAttachFailure() {
   } catch (_) {
     // no UI available (tests / non-page contexts)
   }
-  console.warn(`[BDS:native-settings] ${message}`);
+  console.warn(
+    `[BDS:native-settings] ${message}`,
+    lastMountError ? `Last mount error: ${lastMountError.stack || lastMountError.message || lastMountError}` : ""
+  );
 }
 
 /* ── diagnostics ─────────────────────────────────────────────────────────── */
@@ -887,6 +899,7 @@ function diagnostics() {
     url: location.href,
     theme: document.body?.hasAttribute("data-ds-dark-theme") ? "dark" : "light",
     probing: probing(),
+    lastMountError: lastMountError ? String(lastMountError.stack || lastMountError.message || lastMountError) : null,
     settingsClickedAgoMs: settingsClickedAt ? Date.now() - settingsClickedAt : null,
     mounted: hostEl
       ? {
@@ -1128,6 +1141,7 @@ export const __nativeSettingsInternals = {
   queryRoots,
   onDocumentClick,
   maybeWarnAttachFailure,
+  getLastMountError: () => lastMountError,
   warnAttachFailure,
   observerConfig: {
     childList: true,
